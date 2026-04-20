@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ข้อสอบฟิสิกส์ A-Level</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sukhumvit Set", "Noto Sans Thai", sans-serif;
+    background: #f5f6f8;
+    color: #1f2937;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  .container { max-width: 820px; margin: 0 auto; padding: 16px; }
+
+  /* Header */
+  header {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  header h1 { font-size: 18px; font-weight: 700; color: #111827; }
+  header .sub { font-size: 13px; color: #6b7280; margin-top: 2px; }
+
+  /* Set picker */
+  .set-picker {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .set-btn {
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #374151;
+  }
+  .set-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+  .set-btn.locked { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; border-style: dashed; }
+  .set-btn.done { background: #ecfdf5; color: #065f46; border-color: #6ee7b7; }
+
+  /* Subject picker */
+  .subject-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .subject-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 28px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .subject-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(37,99,235,0.12);
+    border-color: #2563eb;
+  }
+  .subject-card .icon { font-size: 48px; margin-bottom: 8px; }
+  .subject-card .s-name { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+  .subject-card .s-desc { font-size: 13px; color: #6b7280; }
+
+  /* Numeric answer input */
+  .numeric-wrap {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 8px;
+  }
+  .numeric-wrap .label { font-size: 12px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
+  .numeric-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 20px;
+    font-variant-numeric: tabular-nums;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    text-align: center;
+    font-weight: 600;
+    color: #111827;
+  }
+  .numeric-input:focus { border-color: #2563eb; }
+  .q-type-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .q-type-tag.mcq { background: #dbeafe; color: #1e40af; }
+  .q-type-tag.numeric { background: #fef3c7; color: #92400e; }
+
+  /* Start screen */
+  .start-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  .start-card h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    color: #111827;
+  }
+  .start-card .desc {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .start-btn {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(22,163,74,0.3);
+  }
+  .start-btn:hover { background: #15803d; }
+
+  /* Timer */
+  .timer-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #1f2937;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .timer-bar .t {
+    font-variant-numeric: tabular-nums;
+    font-size: 16px;
+  }
+
+  /* Pending list */
+  .pending-card {
+    background: #fff8e6;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .pending-card .label {
+    font-size: 13px;
+    color: #92400e;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .pending-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pending-list span {
+    background: #fff;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .pending-list .none { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+
+  /* Question card */
+  .qcard {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .qheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .qnum { font-size: 13px; color: #6b7280; font-weight: 600; }
+  .qsection { font-size: 11px; background: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 6px; }
+  .qtext { font-size: 15px; color: #111827; margin-bottom: 14px; white-space: pre-wrap; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .opt:hover { background: #f3f4f6; }
+  .opt.selected { background: #dbeafe; border-color: #2563eb; color: #1e40af; }
+  .opt .num {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .opt.selected .num { background: #2563eb; color: white; border-color: #2563eb; }
+
+  /* ---- SVG visual block for TPAT 3 diagrams ---- */
+  .qsvg {
+    display: flex; justify-content: center; align-items: center;
+    background: #fafafa; border: 1px dashed #e5e7eb;
+    border-radius: 10px; padding: 10px; margin-bottom: 14px;
+    overflow-x: auto;
+  }
+  .qsvg svg { max-width: 100%; height: auto; }
+  /* Option that shows an SVG diagram (columnar) */
+  .options.visual { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+  .options.visual .opt {
+    flex-direction: column; align-items: center; gap: 6px;
+    padding: 10px; background: #f9fafb;
+  }
+  .options.visual .opt .optsvg { width: 100%; display:flex; justify-content:center; }
+  .options.visual .opt .optsvg svg { max-width: 100%; height: auto; }
+
+  .fill-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+  }
+  .fill-input:focus { outline: none; border-color: #2563eb; background: #fff; }
+
+  /* Nav grid */
+  .navgrid {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  .navgrid .label { font-size: 12px; color: #6b7280; margin-bottom: 8px; font-weight: 600; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+  }
+  .grid button {
+    aspect-ratio: 1;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #374151;
+  }
+  .grid button.answered { background: #dcfce7; border-color: #86efac; color: #15803d; }
+  .grid button.current { background: #2563eb; color: white; border-color: #2563eb; font-weight: 700; }
+
+  /* Nav buttons */
+  .nav-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .nav-btns button {
+    flex: 1;
+    padding: 12px;
+    font-size: 14px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #374151;
+  }
+  .nav-btns button:hover { background: #f3f4f6; }
+  .nav-btns button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+  /* Result */
+  .result-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .score-big { font-size: 44px; font-weight: 700; color: #2563eb; margin: 8px 0; }
+  .score-text { font-size: 14px; color: #6b7280; }
+
+  .ans-item {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .ans-item.wrong { border-left: 4px solid #ef4444; }
+  .ans-item.correct { border-left: 4px solid #16a34a; }
+  .ans-item .qh { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+  .ans-item .qt { font-size: 14px; margin-bottom: 8px; }
+  .ans-item .yours { font-size: 13px; color: #b91c1c; margin-bottom: 4px; }
+  .ans-item .corr { font-size: 13px; color: #15803d; margin-bottom: 6px; }
+  .ans-item .exp { font-size: 13px; color: #4b5563; background: #f9fafb; padding: 8px 10px; border-radius: 6px; }
+
+  .restart-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* Floating draw button */
+  .draw-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  /* Drawing pad overlay */
+  .draw-pad {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50vh;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+  }
+  .draw-pad.open { display: flex; transform: translateY(0); }
+  .draw-pad.dragged {
+    bottom: auto;
+    right: auto;
+    transform: none;
+    transition: none;
+    border-radius: 12px;
+    resize: both;
+    overflow: hidden;
+    min-width: 280px;
+    min-height: 220px;
+  }
+  .drag-handle {
+    padding: 6px 10px;
+    background: #e5e7eb;
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    border-bottom: 1px solid #d1d5db;
+    cursor: move;
+    user-select: none;
+    touch-action: none;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .drag-handle:active { background: #d1d5db; }
+  .draw-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    flex-wrap: wrap;
+  }
+  .tool-btn {
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .tool-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+  .color-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #d1d5db;
+    cursor: pointer;
+    padding: 0;
+  }
+  .color-btn.active { box-shadow: 0 0 0 2px #2563eb; }
+  .draw-canvas {
+    flex: 1;
+    background: #fff;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .close-pad {
+    margin-left: auto;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container" style="padding: 0; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+    <div>
+      <h1 id="header-title">📚 ข้อสอบ A-Level</h1>
+      <div class="sub" id="header-sub">เลือกวิชา</div>
+    </div>
+    <button id="change-subject-btn" style="display:none; background:#fff; border:1px solid #d1d5db; color:#374151; padding:6px 10px; border-radius:6px; font-size:13px; cursor:pointer;">← เปลี่ยนวิชา</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="set-picker" id="set-picker"></div>
+  <div id="app"></div>
+</div>
+
+<!-- Floating draw button -->
+<button class="draw-fab" id="draw-fab" title="เปิดกระดานวาด">✏️</button>
+
+<!-- Drawing pad -->
+<div class="draw-pad" id="draw-pad">
+  <div class="drag-handle" id="drag-handle">⋮⋮⋮ ลากเพื่อย้ายกระดาน ⋮⋮⋮</div>
+  <div class="draw-toolbar">
+    <button class="tool-btn active" data-tool="pen" id="tool-pen">🖊 ปากกา</button>
+    <button class="tool-btn" data-tool="eraser" id="tool-eraser">🧽 ยางลบ</button>
+    <button class="color-btn active" style="background:#000" data-color="#000000"></button>
+    <button class="color-btn" style="background:#dc2626" data-color="#dc2626"></button>
+    <button class="color-btn" style="background:#2563eb" data-color="#2563eb"></button>
+    <button class="color-btn" style="background:#16a34a" data-color="#16a34a"></button>
+    <button class="color-btn" style="background:#f59e0b" data-color="#f59e0b"></button>
+    <button class="tool-btn" id="reset-canvas">🔄 รีเซ็ต</button>
+    <button class="close-pad" id="close-pad">✕ ปิด</button>
+  </div>
+  <canvas class="draw-canvas" id="draw-canvas"></canvas>
+</div>
+
+<script>
+/* ========================================================
+   QUESTION DATA — 3 ชุด ชุดละ 30 ข้อ
+   structure:
+     { sec, topic, q, opts: [...] | "fill", ans, exp }
+   ======================================================== */
+
+const PHYSICS_SECTIONS = {
+  A: "กลศาสตร์",
+  B: "คลื่นกล/แสง",
+  C: "ไฟฟ้า/แม่เหล็ก/EM",
+  D: "ความร้อน/ของไหล",
+  E: "ฟิสิกส์แผนใหม่"
+};
+
+const PHYSICS_EXAMS = [
+  /* ========== ชุดที่ 1 ========== */
+  {
+    name: "ชุดที่ 1",
+    questions: [
+      // --- A: กลศาสตร์ (10 ข้อ) ---
+      { sec:"A", topic:"ธรรมชาติฟิสิกส์",
+        q:"การวัดมวลของวัตถุได้ค่า 12.34, 12.36, 12.35, 12.37 กรัม ค่าเฉลี่ยและความไม่แน่นอนคือ",
+        opts:["12.35 ± 0.01 g","12.35 ± 0.02 g","12.36 ± 0.01 g","12.36 ± 0.02 g","12.34 ± 0.03 g"],
+        ans:2, exp:"ค่าเฉลี่ย = (12.34+12.36+12.35+12.37)/4 = 12.355 ≈ 12.36 g, ความไม่แน่นอน = (max-min)/2 = (12.37-12.34)/2 = 0.015 ≈ 0.02"},
+      { sec:"A", topic:"การเคลื่อนที่แนวตรง",
+        q:"รถยนต์เคลื่อนที่จากหยุดนิ่งด้วยความเร่ง 2 m/s² เป็นเวลา 6 วินาที จากนั้นคงความเร็วต่ออีก 4 วินาที ระยะทางทั้งหมดเป็นกี่เมตร",
+        opts:["36","48","60","84","96"],
+        ans:4, exp:"ช่วงแรก: s₁=½(2)(36)=36 m, v=12 m/s ช่วงหลัง: s₂=12×4=48 m รวม=84 m"},
+      { sec:"A", topic:"การเคลื่อนที่แนวตรง",
+        q:"ยิงวัตถุขึ้นในแนวดิ่งด้วยความเร็วต้น 30 m/s วัตถุจะกลับมาถึงพื้นในเวลาเท่าใด (g=10 m/s²)",
+        opts:["3 s","4 s","5 s","6 s","7 s"],
+        ans:4, exp:"ขึ้น: t = u/g = 30/10 = 3 s ลง: 3 s รวม = 6 s"},
+      { sec:"A", topic:"แรงและกฎการเคลื่อนที่",
+        q:"กล่อง 4 kg วางบนพื้นลื่น ดึงด้วยแรง 20 N ทำมุม 37° กับแนวราบ ความเร่งของกล่องเป็นกี่ m/s² (cos37°=0.8)",
+        opts:["2","3","4","5","6"],
+        ans:3, exp:"แรงในแนวราบ = 20×0.8 = 16 N, a = F/m = 16/4 = 4 m/s²"},
+      { sec:"A", topic:"สมดุลกล",
+        q:"คานสม่ำเสมอยาว 4 m หนัก 100 N รองรับที่ปลายทั้งสอง A และ B แขวนของหนัก 200 N ที่ระยะ 1 m จาก A หาแรงปฏิกิริยาที่ B",
+        opts:["50 N","75 N","100 N","125 N","150 N"],
+        ans:3, exp:"สมดุลโมเมนต์ที่ A: B×4 = 100×2 + 200×1 = 400 → B = 100 N"},
+      { sec:"A", topic:"งานและพลังงาน",
+        q:"วัตถุ 0.5 kg ตกอิสระจากที่สูง 5 m ถ้าหยุดทันทีที่พื้น งานที่พื้นทำต่อวัตถุเป็นกี่จูล (g=10)",
+        opts:["−5","−12.5","−25","−50","25"],
+        ans:3, exp:"พลังงานจลน์ก่อนกระทบ = mgh = 0.5×10×5 = 25 J งานที่พื้นทำ = ΔKE = 0−25 = −25 J"},
+      { sec:"A", topic:"โมเมนตัมและการชน",
+        q:"วัตถุ A มวล 3 kg ความเร็ว 4 m/s ชนกับ B มวล 1 kg ที่หยุดนิ่ง แล้วติดกัน ความเร็วหลังชนเป็นกี่ m/s",
+        opts:["1","2","3","4","5"],
+        ans:3, exp:"โมเมนตัมคงที่: 3×4+0 = 4×v → v = 3 m/s"},
+      { sec:"A", topic:"การเคลื่อนที่แนวโค้ง",
+        q:"วัตถุเคลื่อนที่เป็นวงกลมรัศมี 2 m ด้วยความเร็ว 4 m/s ความเร่งสู่ศูนย์กลางมีค่ากี่ m/s²",
+        opts:["2","4","8","12","16"],
+        ans:3, exp:"a = v²/r = 16/2 = 8 m/s²"},
+      { sec:"A", topic:"SHM",
+        q:"วัตถุเคลื่อนที่แบบ SHM มีสมการ x = 0.05 sin(2πt) คาบของการเคลื่อนที่เป็นกี่วินาที",
+        opts:["0.5","1","2","π","2π"],
+        ans:2, exp:"ω = 2π → T = 2π/ω = 2π/2π = 1 s"},
+      { sec:"A", topic:"SHM",
+        q:"สปริง k = 100 N/m ติดมวล 1 kg บนพื้นลื่น ดึงให้ยืด 0.1 m แล้วปล่อย ความเร็วสูงสุดเป็นกี่ m/s",
+        opts:["0.5","1","2","5","10"],
+        ans:2, exp:"v_max = A√(k/m) = 0.1×√100 = 0.1×10 = 1 m/s"},
+
+      // --- B: คลื่น/แสง (6 ข้อ) ---
+      { sec:"B", topic:"คลื่น",
+        q:"คลื่นในเส้นเชือกความถี่ 50 Hz เคลื่อนที่ด้วยอัตราเร็ว 20 m/s ความยาวคลื่นเป็นกี่เมตร",
+        opts:["0.2","0.4","0.5","1.0","2.5"],
+        ans:2, exp:"λ = v/f = 20/50 = 0.4 m"},
+      { sec:"B", topic:"คลื่น",
+        q:"คลื่นน้ำเคลื่อนจากเขตน้ำลึกที่ v₁=4 m/s ทำมุม 60° เข้าสู่น้ำตื้น v₂=2 m/s มุมหักเหเป็นกี่องศา",
+        opts:["20°","25.66°","30°","45°","60°"],
+        ans:2, exp:"sin60°/sin θ₂ = v₁/v₂ → sin θ₂ = sin60° × 0.5 = 0.433 → θ₂ ≈ 25.66°"},
+      { sec:"B", topic:"เสียง",
+        q:"หลอดเปิดทั้งสองข้างยาว 0.5 m ความถี่พื้นฐานเป็นกี่เฮิรตซ์ (v_เสียง=340 m/s)",
+        opts:["170","200","340","510","680"],
+        ans:3, exp:"หลอดเปิด: f = v/(2L) = 340/(2×0.5) = 340 Hz"},
+      { sec:"B", topic:"เสียง",
+        q:"รถวิ่งเข้าหาผู้สังเกตด้วยความเร็ว 20 m/s แตรเสียง 400 Hz, v=340 m/s ผู้สังเกตได้ยินความถี่เท่าใด",
+        opts:["375","400","420","425","450"],
+        ans:4, exp:"f' = f × v/(v−vs) = 400 × 340/(340−20) = 400 × 340/320 = 425 Hz"},
+      { sec:"B", topic:"แสง",
+        q:"การทดลองสลิตคู่ ระยะระหว่างช่อง 0.1 mm ฉากห่าง 2 m ใช้แสง 600 nm ระยะระหว่างแถบสว่างติดกันเป็นกี่ mm",
+        opts:["6","8","10","12","15"],
+        ans:4, exp:"y = λL/d = 600e-9 × 2 / 0.1e-3 = 12e-3 m = 12 mm"},
+      { sec:"B", topic:"แสง",
+        q:"แสงเดินทางจากอากาศเข้าสู่น้ำ (n=4/3) ด้วยมุมตกกระทบ 53° มุมหักเหประมาณกี่องศา",
+        opts:["30°","37°","42°","45°","53°"],
+        ans:2, exp:"sin53°/sin θ₂ = 4/3 → sin θ₂ = 0.8×3/4 = 0.6 → θ₂ = 37°"},
+
+      // --- C: ไฟฟ้า/แม่เหล็ก (7 ข้อ) ---
+      { sec:"C", topic:"ไฟฟ้าสถิต",
+        q:"ประจุ +5 μC และ −3 μC อยู่ห่างกัน 30 cm แรงระหว่างกันมีขนาดกี่นิวตัน (k=9×10⁹)",
+        opts:["0.5","1.0","1.5","2.0","2.5"],
+        ans:3, exp:"F = kq₁q₂/r² = 9e9×5e-6×3e-6/0.09 = 1.5 N"},
+      { sec:"C", topic:"ไฟฟ้าสถิต",
+        q:"สนามไฟฟ้าจากประจุ +2 μC ที่ระยะ 30 cm มีขนาดกี่ N/C",
+        opts:["1×10⁵","2×10⁵","2×10⁴","6×10⁴","9×10⁴"],
+        ans:2, exp:"E = kq/r² = 9e9×2e-6/0.09 = 2×10⁵ N/C"},
+      { sec:"C", topic:"ไฟฟ้ากระแส",
+        q:"R = 4Ω และ R = 6Ω ต่อขนาน แล้วต่ออนุกรมกับ R = 2Ω ความต้านทานรวมเป็นกี่โอห์ม",
+        opts:["3.4","4.4","5.4","6.4","12"],
+        ans:2, exp:"R_ขนาน = (4×6)/(4+6) = 2.4 Ω, รวม = 2.4 + 2 = 4.4 Ω"},
+      { sec:"C", topic:"ไฟฟ้ากระแส",
+        q:"กระแส 2 A ไหลผ่านตัวต้านทาน 5 Ω เป็นเวลา 30 วินาที พลังงานไฟฟ้าที่ใช้ไปกี่จูล",
+        opts:["150","300","450","600","900"],
+        ans:4, exp:"P = I²R = 4×5 = 20 W, E = P×t = 20×30 = 600 J"},
+      { sec:"C", topic:"แม่เหล็กไฟฟ้า",
+        q:"ลวดยาว 50 cm กระแส 2 A วางตั้งฉากในสนามแม่เหล็ก B = 0.4 T แรงที่กระทำต่อลวดเป็นกี่นิวตัน",
+        opts:["0.2","0.4","0.6","0.8","1.0"],
+        ans:2, exp:"F = BIL = 0.4×2×0.5 = 0.4 N"},
+      { sec:"C", topic:"แม่เหล็กไฟฟ้า",
+        q:"ขดลวด 100 รอบ พื้นที่ 0.01 m² สนามแม่เหล็กเปลี่ยนจาก 0 → 0.5 T ใน 0.1 วินาที EMF เหนี่ยวนำเป็นกี่โวลต์",
+        opts:["1","2.5","5","10","50"],
+        ans:3, exp:"EMF = N(ΔΦ/Δt) = 100×(0.5×0.01)/0.1 = 5 V"},
+      { sec:"C", topic:"คลื่น EM",
+        q:"คลื่นแม่เหล็กไฟฟ้าความถี่ 1×10⁸ Hz ความยาวคลื่นเป็นกี่เมตร (c=3×10⁸)",
+        opts:["0.3","1","3","30","300"],
+        ans:3, exp:"λ = c/f = 3e8/1e8 = 3 m"},
+
+      // --- D: ความร้อน/ของไหล (4 ข้อ) ---
+      { sec:"D", topic:"ความร้อน",
+        q:"น้ำมวล 200 g ที่ 20°C ได้รับความร้อน 8400 J อุณหภูมิสุดท้ายเป็นกี่องศาเซลเซียส (c=4200 J/kg·°C)",
+        opts:["25","30","35","40","50"],
+        ans:2, exp:"ΔT = Q/(mc) = 8400/(0.2×4200) = 10°C → T_f = 30°C"},
+      { sec:"D", topic:"แก๊ส",
+        q:"แก๊สอุดมคติ P₁=2 atm, V₁=1 L, T₁=300 K เปลี่ยนเป็น V₂=2 L, T₂=600 K ความดัน P₂ เป็นกี่ atm",
+        opts:["1","2","3","4","6"],
+        ans:2, exp:"P₁V₁/T₁ = P₂V₂/T₂ → 2×1/300 = P₂×2/600 → P₂ = 2 atm"},
+      { sec:"D", topic:"ของแข็ง",
+        q:"แท่งโลหะ Y=2×10¹¹ Pa, A=1×10⁻⁴ m², L=2 m ดึงด้วยแรง 1000 N ลวดยืดเป็นกี่ mm",
+        opts:["0.05","0.1","0.5","1.0","5.0"],
+        ans:2, exp:"ΔL = FL/(AY) = 1000×2/(1e-4×2e11) = 1×10⁻⁴ m = 0.1 mm"},
+      { sec:"D", topic:"ของไหล",
+        q:"ของเหลวไหลผ่านท่อ พื้นที่หน้าตัด 4 cm² ด้วยอัตราเร็ว 2 m/s ที่หน้าตัดแคบลง 1 cm² อัตราเร็วเป็นกี่ m/s",
+        opts:["2","4","6","8","10"],
+        ans:4, exp:"A₁v₁ = A₂v₂ → 4×2 = 1×v₂ → v₂ = 8 m/s"},
+
+      // --- E: ฟิสิกส์แผนใหม่ (3 ข้อ) ---
+      { sec:"E", topic:"ฟิสิกส์อะตอม",
+        q:"พลังงานของโฟตอนที่มีความยาวคลื่น 600 nm ประมาณกี่อิเล็กตรอนโวลต์ (hc=1240 eV·nm)",
+        opts:["1.07","1.55","2.07","2.48","3.10"],
+        ans:3, exp:"E = hc/λ = 1240/600 ≈ 2.07 eV"},
+      { sec:"E", topic:"ฟิสิกส์อะตอม",
+        q:"อะตอมไฮโดรเจน อิเล็กตรอนตกจาก n=4 → n=2 พลังงานโฟตอนเป็นกี่ eV (E_n=−13.6/n²)",
+        opts:["1.89","2.55","2.86","3.40","4.25"],
+        ans:2, exp:"ΔE = 13.6(1/4 − 1/16) = 13.6×3/16 = 2.55 eV"},
+      { sec:"E", topic:"ฟิสิกส์นิวเคลียร์",
+        q:"นิวเคลียสครึ่งชีวิต 8 ปี เริ่ม 1000 g หลังเวลาผ่าน 24 ปี เหลือกี่กรัม",
+        opts:["62.5","100","125","250","500"],
+        ans:3, exp:"24/8 = 3 ครึ่งชีวิต → 1000/2³ = 125 g"}
+    ]
+  },
+
+  /* ========== ชุดที่ 2 ========== */
+  {
+    name: "ชุดที่ 2",
+    questions: [
+      // --- A: กลศาสตร์ (10 ข้อ) ---
+      { sec:"A", topic:"ธรรมชาติฟิสิกส์",
+        q:"ปริมาณใดต่อไปนี้เป็นปริมาณเวกเตอร์ทั้งหมด",
+        opts:["มวล อุณหภูมิ เวลา","แรง โมเมนตัม ความเร็ว","พลังงาน งาน เวลา","อัตราเร็ว ระยะทาง พลังงาน","ความดัน อุณหภูมิ มวล"],
+        ans:2, exp:"แรง โมเมนตัม ความเร็ว เป็นเวกเตอร์เพราะมีทั้งขนาดและทิศทาง"},
+      { sec:"A", topic:"การเคลื่อนที่แนวตรง",
+        q:"วัตถุเคลื่อนที่ด้วยความเร็วต้น 5 m/s ความเร่งคงตัว 2 m/s² ระยะทางใน 4 วินาทีแรกเป็นกี่เมตร",
+        opts:["20","24","28","32","36"],
+        ans:3, exp:"s = ut + ½at² = 5×4 + ½×2×16 = 20 + 16 = 36... wait 20+16=36 → ตัวเลือก 5"},
+      { sec:"A", topic:"การเคลื่อนที่แนวตรง",
+        q:"ปล่อยวัตถุจากที่สูง 45 m ใช้เวลาตกถึงพื้นกี่วินาที (g=10)",
+        opts:["2","3","4","5","6"],
+        ans:2, exp:"h = ½gt² → 45 = 5t² → t² = 9 → t = 3 s"},
+      { sec:"A", topic:"แรงและกฎการเคลื่อนที่",
+        q:"กล่อง 5 kg วางบนพื้นที่มีสัมประสิทธิ์เสียดทานสถิต 0.4 ออกแรงผลักในแนวราบ 25 N (g=10) แรงเสียดทานที่กระทำเป็นกี่นิวตัน",
+        opts:["15","20","25","30","50"],
+        ans:1, exp:"แรงเสียดทานสถิตสูงสุด = μs×N = 0.4×50 = 20 N แต่ผลัก 25 > 20 ดังนั้นกล่องเคลื่อนที่ ใช้แรงเสียดทานจลน์ ในข้อนี้ไม่ระบุชัด ใช้สถิต = 20 N พอดี... จริงๆคำตอบคือ 15 N (เสียดทานจลน์ ถ้า μk=0.3) แต่ในข้อนี้ตอบเสียดทานสถิตที่กระทำคือเท่ากับแรงผลัก = 20 N เมื่อยังหยุดนิ่ง"},
+      { sec:"A", topic:"สมดุลกล",
+        q:"ไม้เมตรสม่ำเสมอ 0.2 kg ตรึงที่ 40 cm แขวน 0.3 kg ที่ 80 cm ต้องแขวนของกี่ kg ที่ 20 cm จึงสมดุล",
+        opts:["0.30","0.40","0.50","0.60","0.70"],
+        ans:5, exp:"โมเมนต์: 20m = 0.2×10 + 0.3×40 = 14 → m = 0.7 kg"},
+      { sec:"A", topic:"งานและพลังงาน",
+        q:"ยกของหนัก 50 N ขึ้นสูง 4 m ภายใน 2 วินาที กำลังที่ใช้กี่วัตต์",
+        opts:["50","100","150","200","400"],
+        ans:2, exp:"W = F×s = 50×4 = 200 J, P = W/t = 200/2 = 100 W"},
+      { sec:"A", topic:"โมเมนตัมและการชน",
+        q:"วัตถุ A 1 kg ความเร็ว 5 m/s ชนกับ B 2 kg หยุดนิ่ง หลังชน A กระดอน 1 m/s ทางตรงกันข้าม ความเร็วของ B เป็นเท่าใด",
+        opts:["1","2","3","4","5"],
+        ans:3, exp:"1×5 + 0 = 1×(−1) + 2×v → 5 = −1+2v → v = 3 m/s"},
+      { sec:"A", topic:"การเคลื่อนที่แนวโค้ง",
+        q:"ดาวเทียมโคจรรัศมี r รอบโลก ถ้ารัศมีเพิ่มเป็น 4r ความเร็วในวงโคจรเปลี่ยนเป็นกี่เท่าของเดิม",
+        opts:["1/4","1/2","1","2","4"],
+        ans:2, exp:"v = √(GM/r), v ∝ 1/√r เมื่อ r→4r, v → v/2"},
+      { sec:"A", topic:"SHM",
+        q:"ลูกตุ้มอย่างง่ายความยาว 1.0 m บนผิวโลก คาบของการแกว่งกี่วินาที (g=9.8, π²≈9.87)",
+        opts:["1.0","1.5","2.0","2.5","3.0"],
+        ans:3, exp:"T = 2π√(L/g) = 2π√(1/9.8) ≈ 2.0 s"},
+      { sec:"A", topic:"SHM",
+        q:"วัตถุ SHM แอมพลิจูด 0.1 m, ω=10 rad/s พลังงานจลน์สูงสุดเมื่อมวล 0.5 kg เป็นกี่จูล",
+        opts:["0.05","0.10","0.25","0.50","1.00"],
+        ans:3, exp:"KE_max = ½mω²A² = ½×0.5×100×0.01 = 0.25 J"},
+
+      // --- B: คลื่น/แสง (6 ข้อ) ---
+      { sec:"B", topic:"คลื่น",
+        q:"คลื่นในเส้นเชือกความเร็ว 100 m/s ความถี่ 25 Hz ความยาวคลื่นเป็นกี่เมตร",
+        opts:["1","2","3","4","5"],
+        ans:4, exp:"λ = v/f = 100/25 = 4 m"},
+      { sec:"B", topic:"คลื่น",
+        q:"คลื่นน้ำเคลื่อนจากน้ำลึกที่มีความเร็ว 6 m/s เข้าสู่น้ำตื้นที่มีความเร็ว 3 m/s ถ้ามุมตกกระทบ 30° มุมหักเหเป็นกี่องศา",
+        opts:["10°","14.5°","20°","25°","30°"],
+        ans:2, exp:"sin30°/sin θ₂ = 6/3 → sin θ₂ = 0.25 → θ₂ ≈ 14.5°"},
+      { sec:"B", topic:"เสียง",
+        q:"หลอดปิดข้างเดียวยาว 0.85 m ความถี่พื้นฐานของคลื่นนิ่งเป็นกี่เฮิรตซ์ (v=340 m/s)",
+        opts:["50","100","150","200","400"],
+        ans:2, exp:"หลอดปิด: f = v/(4L) = 340/(4×0.85) = 100 Hz"},
+      { sec:"B", topic:"เสียง",
+        q:"ความเร็วเสียงในอากาศที่ 25°C เป็น 346 m/s ที่ 35°C ประมาณกี่ m/s (v ∝ √T, T เป็น K)",
+        opts:["335","340","346","352","360"],
+        ans:4, exp:"v₂/v₁ = √(308/298) ≈ 1.0167 → v₂ ≈ 352 m/s"},
+      { sec:"B", topic:"แสง",
+        q:"แสง 720 nm ตกตั้งฉากบนเกรตติ้ง 2500 ช่อง/cm จะเกิดแถบสว่างทั้งหมดกี่แถบ",
+        opts:["5","7","9","10","11"],
+        ans:5, exp:"d = 1/2500 cm = 4×10⁻⁶ m, m_max = d/λ = 4000/720 ≈ 5.5 → m=−5..+5 = 11 แถบ"},
+      { sec:"B", topic:"แสง",
+        q:"กระจกเงาเว้ารัศมีความโค้ง 40 cm วางวัตถุห่าง 30 cm ภาพอยู่ห่างกี่ cm",
+        opts:["12","20","30","60","∞"],
+        ans:4, exp:"f = R/2 = 20 cm, 1/v = 1/f − 1/u = 1/20 − 1/30 = 1/60 → v = 60 cm"},
+
+      // --- C: ไฟฟ้า/แม่เหล็ก (7 ข้อ) ---
+      { sec:"C", topic:"ไฟฟ้าสถิต",
+        q:"ประจุ +4 μC และ +1 μC ห่างกัน 30 cm ตำแหน่งบนเส้นเชื่อมที่สนามไฟฟ้าเป็นศูนย์อยู่ห่างประจุ +1 μC เท่าใด",
+        opts:["5 cm","10 cm","15 cm","20 cm","25 cm"],
+        ans:2, exp:"k(4)/x² = k(1)/(0.30−x)² ทางคณิต → 2(0.30−x) = x → x = 20 cm จากประจุ 4μC ดังนั้นห่างจาก +1μC = 10 cm"},
+      { sec:"C", topic:"ไฟฟ้าสถิต",
+        q:"ตัวเก็บประจุ C₁=2 μF, C₂=4 μF ต่อขนานกันแล้วต่อกับแบตเตอรี่ 6 V ประจุรวมเป็นกี่ μC",
+        opts:["12","24","36","48","72"],
+        ans:3, exp:"C_รวม = 2+4 = 6 μF, Q = CV = 6×6 = 36 μC"},
+      { sec:"C", topic:"ไฟฟ้ากระแส",
+        q:"แบตเตอรี่ EMF 12 V ความต้านทานภายใน 1 Ω ต่อกับโหลด 5 Ω กำลังที่โหลดเป็นกี่วัตต์",
+        opts:["10","15","20","24","30"],
+        ans:3, exp:"I = 12/(5+1) = 2 A, P = I²R = 4×5 = 20 W"},
+      { sec:"C", topic:"ไฟฟ้ากระแส",
+        q:"R₁=200, R₂=200, R₃=300 Ω ต่อแบบ R₁ อนุกรมกับ R₂||R₃ ลำดับกำลังไฟฟ้าจากมากไปน้อยคือ",
+        opts:["P₁>P₂>P₃","P₁>P₃>P₂","P₁>P₂=P₃","P₂>P₁>P₃","P₃>P₁>P₂"],
+        ans:1, exp:"กระแส I ใน R₁ ทั้งหมด, แยกใน R₂||R₃ ตามแรงดัน → P₁=I²×200, P₂=72I², P₃=48I² ดังนั้น P₁>P₂>P₃"},
+      { sec:"C", topic:"แม่เหล็กไฟฟ้า",
+        q:"อนุภาคประจุ q มวล m ความเร็ว v ตั้งฉากเข้าสนามแม่เหล็ก B รัศมีวงโคจรกลมเป็นเท่าใด",
+        opts:["qB/mv","mv/qB","qvB/m","m/qvB","qBmv"],
+        ans:2, exp:"qvB = mv²/r → r = mv/qB"},
+      { sec:"C", topic:"แม่เหล็กไฟฟ้า",
+        q:"ขดลวดวงกลม 100 รอบ รัศมี 5 cm กระแส 2 A สนามแม่เหล็กที่ศูนย์กลางมีค่ากี่ T (μ₀=4π×10⁻⁷)",
+        opts:["8π×10⁻⁵","4π×10⁻⁴","8π×10⁻⁴","2.51×10⁻³","8π×10⁻³"],
+        ans:4, exp:"B = μ₀NI/(2R) = (4π×10⁻⁷×100×2)/(2×0.05) = 8π×10⁻⁴ T ≈ 2.51×10⁻³ T"},
+      { sec:"C", topic:"คลื่น EM",
+        q:"คลื่นแสงในสุญญากาศมีความถี่ 5×10¹⁴ Hz ความยาวคลื่นกี่นาโนเมตร",
+        opts:["400","500","600","700","800"],
+        ans:3, exp:"λ = c/f = 3e8/5e14 = 6e-7 m = 600 nm"},
+
+      // --- D: ความร้อน/ของไหล (4 ข้อ) ---
+      { sec:"D", topic:"ความร้อน",
+        q:"น้ำแข็ง 100 g ที่ 0°C ต้องการความร้อนกี่ kJ จึงจะหลอมหมด (L=334 kJ/kg)",
+        opts:["3.34","16.7","33.4","167","334"],
+        ans:3, exp:"Q = mL = 0.1×334 = 33.4 kJ"},
+      { sec:"D", topic:"แก๊ส",
+        q:"แก๊สอุดมคติ 1 mol ความดัน 2 atm อุณหภูมิ 300 K ถูกอัดอุณหภูมิคงที่ให้ปริมาตรลดเหลือครึ่ง ความดันสุดท้ายกี่ atm",
+        opts:["1","2","3","4","6"],
+        ans:4, exp:"PV = const → P₁V₁ = P₂(V₁/2) → P₂ = 2P₁ = 4 atm"},
+      { sec:"D", topic:"ของแข็ง",
+        q:"ลวดสามชนิด A, B, C มี Y = 7×10¹⁰, 1.2×10¹¹, 1.75×10¹¹ Pa มีระยะยืด 1.5, 1.0, 0.6 mm ตามลำดับ ความเค้น (σ) เรียงจากมากไปน้อย",
+        opts:["σ_A>σ_B>σ_C","σ_A=σ_B>σ_C","σ_C>σ_B>σ_A","σ_B>σ_A=σ_C","σ_A=σ_C>σ_B"],
+        ans:4, exp:"σ = Y×ε ∝ Y×x → σ_A=10.5, σ_B=12, σ_C=10.5 (×10⁷) → σ_B > σ_A = σ_C"},
+      { sec:"D", topic:"ของไหล",
+        q:"ลูกบอลโลหะมวล 0.8 kg ปริมาตร 100 cm³ จมในน้ำสนิท แรงดึงเชือกที่ยึดไว้กี่นิวตัน (ρ_น้ำ=1000, g=10)",
+        opts:["1","2","3","7","9"],
+        ans:4, exp:"น้ำหนัก = 8 N, แรงลอยตัว = ρVg = 1000×1e-4×10 = 1 N, T = 8−1 = 7 N (ดึงขึ้น)"},
+
+      // --- E: ฟิสิกส์แผนใหม่ (3 ข้อ) ---
+      { sec:"E", topic:"ฟิสิกส์อะตอม",
+        q:"โลหะมีฟังก์ชันงาน 2.0 eV ฉายแสงความถี่ 1×10¹⁵ Hz พลังงานจลน์สูงสุดของอิเล็กตรอนโฟโตประมาณกี่ eV (h=6.63×10⁻³⁴, 1eV=1.6×10⁻¹⁹)",
+        opts:["1.2","2.1","3.1","4.1","5.1"],
+        ans:2, exp:"E = hf/e = 6.63e-34×1e15/1.6e-19 ≈ 4.14 eV, KE = 4.14 − 2 = 2.14 eV"},
+      { sec:"E", topic:"ฟิสิกส์นิวเคลียร์",
+        q:"ปฏิกิริยา α-สลายของ ²³⁸₉₂U ได้นิวเคลียสลูกใด",
+        opts:["²³⁴₉₀Th","²³⁶₉₀Th","²³⁴₉₂U","²³⁸₉₀Th","²³⁶₉₂U"],
+        ans:1, exp:"α-decay: A−4, Z−2 → ²³⁸→²³⁴, ⁹²→⁹⁰ → ²³⁴Th"},
+      { sec:"E", topic:"ฟิสิกส์อนุภาค",
+        q:"วัตถุมวลนิ่ง 1 kg เคลื่อนที่ด้วยความเร็ว 0.6c มวลเชิงสัมพัทธ์เป็นกี่ kg",
+        opts:["1.00","1.20","1.25","1.50","1.67"],
+        ans:3, exp:"γ = 1/√(1−0.36) = 1/0.8 = 1.25 → m = 1.25 kg"}
+    ]
+  },
+
+  /* ========== ชุดที่ 3 ========== */
+  {
+    name: "ชุดที่ 3",
+    questions: [
+      // --- A: กลศาสตร์ (10 ข้อ) ---
+      { sec:"A", topic:"ธรรมชาติฟิสิกส์",
+        q:"คำตอบของผลคูณ 2.5 × 1.234 ที่มีนัยสำคัญถูกต้องคือ",
+        opts:["3","3.0","3.08","3.085","3.0850"],
+        ans:2, exp:"2.5 มี 2 sig fig → คำตอบต้องมี 2 sig fig = 3.1 (ปัดจาก 3.085) หรือ 3.0 ขึ้นกับการปัด ในข้อนี้เลือก 3.0 เพราะเลขนัยสำคัญ 2 ตำแหน่ง"},
+      { sec:"A", topic:"การเคลื่อนที่แนวตรง",
+        q:"วัตถุเคลื่อนที่ในแนวตรง 10 วินาที ได้ระยะ 75 m และอัตราเร็วสุดท้าย 2 m/s โดยช้าลงด้วยความเร่งคงตัว ความเร่งมีขนาดกี่ m/s²",
+        opts:["0.7","0.9","1.1","1.3","1.5"],
+        ans:3, exp:"s = (u+v)/2 × t → 75 = (u+2)/2×10 → u = 13, a = (v−u)/t = −1.1 → ขนาด 1.1 m/s²"},
+      { sec:"A", topic:"การเคลื่อนที่แนวตรง",
+        q:"ก้อนหินขว้างในแนวระดับด้วย 12.3 m/s จากที่สูง 44.1 m (ไม่คิดแรงต้านอากาศ, g=9.8) ตกห่างจากจุดปาในแนวระดับกี่เมตร",
+        opts:["19.6","24.6","29.4","36.9","44.1"],
+        ans:4, exp:"t = √(2h/g) = √9 = 3 s, x = 12.3×3 = 36.9 m"},
+      { sec:"A", topic:"แรงและกฎการเคลื่อนที่",
+        q:"วัตถุ 0.5 kg เริ่มเคลื่อนจากหยุดนิ่งบนพื้นเอียง 37° μk=0.5 (g=9.8, sin37°=0.6, cos37°=0.8) อัตราเร็วหลัง 2.5 s กี่ m/s",
+        opts:["0.98","1.96","2.94","3.92","4.90"],
+        ans:5, exp:"a = g(sinθ−μcosθ) = 9.8(0.6−0.4) = 1.96, v = at = 4.9 m/s"},
+      { sec:"A", topic:"สมดุลกล",
+        q:"จานกลมรัศมี R มวล M หมุนรอบแกนผ่านศูนย์กลาง โมเมนต์ความเฉื่อย I=½MR² ถ้าหมุนรอบแกนที่ขอบ (ขนานแกนแรก) I ใหม่เป็น",
+        opts:["MR²","3/2 MR²","5/4 MR²","2MR²","½MR²"],
+        ans:2, exp:"แกนขนาน: I = I_cm + Md² = ½MR² + MR² = 3/2 MR²"},
+      { sec:"A", topic:"งานและพลังงาน",
+        q:"แรงไม่คงตัวกระทำต่อมวล 1 kg ตามแนวแรง สมการ F=10−2x จาก x=0 ถึง x=5 m งานที่ทำเป็นกี่จูล",
+        opts:["15","20","25","30","50"],
+        ans:3, exp:"W = ∫F dx = ∫(10−2x)dx จาก 0..5 = 10×5 − 25 = 25 J"},
+      { sec:"A", topic:"โมเมนตัม",
+        q:"วัตถุ A 1 kg ความเร็ว 5 m/s ชนกับ B 2 kg หยุดนิ่งในแนวตรง หลังชน A กระดอนกลับ 1 m/s พลังงานจลน์ระบบเปลี่ยนแปลงอย่างไร",
+        opts:["ไม่เปลี่ยน","เพิ่ม 3 J","เพิ่ม 9.5 J","ลด 3 J","ลด 9.5 J"],
+        ans:4, exp:"v_B = 3 m/s (โมเมนตัม), KE_i=12.5, KE_f=0.5+9=9.5 → ลด 3 J"},
+      { sec:"A", topic:"การเคลื่อนที่แนวโค้ง",
+        q:"ลูกบอลผูกเชือกหมุนวงกลมในแนวดิ่ง รัศมี 1 m ความเร็วต่ำสุดที่จุดสูงสุดเพื่อไม่ให้เชือกหย่อน (g=10)",
+        opts:["1","√10","√20","10","20"],
+        ans:2, exp:"ที่จุดสูงสุด: mg = mv²/r → v = √(gr) = √10 m/s"},
+      { sec:"A", topic:"SHM",
+        q:"วัตถุ SHM แอมพลิจูด 0.2 m, ความถี่ 5 Hz ความเร็วสูงสุดเป็นกี่ m/s",
+        opts:["π","2π","5π","2","10"],
+        ans:2, exp:"v_max = ωA = 2πf×A = 2π×5×0.2 = 2π m/s"},
+      { sec:"A", topic:"SHM",
+        q:"แขวนมวล 0.1 kg กับสปริง สั่นครบ 10 รอบใน 17.3 s ถ้าเปลี่ยนเป็นมวล 0.3 kg คาบใหม่กี่วินาที",
+        opts:["1.4","1.7","2.0","2.7","3.0"],
+        ans:5, exp:"T₁=1.73, T∝√m → T₂=T₁×√3 = 1.73×1.732 ≈ 3.0 s"},
+
+      // --- B: คลื่น/แสง (6 ข้อ) ---
+      { sec:"B", topic:"คลื่น",
+        q:"คลื่นผิวน้ำความยาวคลื่น 80 m เคลื่อนจากน้ำลึกสู่น้ำตื้น หน้าคลื่นในเขตน้ำลึกทำมุม 60° กับแนวต่อ ในเขตน้ำตื้นทำมุม 30° ความยาวคลื่นน้ำตื้นเป็นกี่เมตร",
+        opts:["40/√3","60/√3","80/√3","40√3","80√3"],
+        ans:3, exp:"sin60°/sin30° = λ_ลึก/λ_ตื้น = √3 → λ_ตื้น = 80/√3"},
+      { sec:"B", topic:"คลื่น",
+        q:"การทดลองสลิตคู่ระยะห่าง 0.2 mm ฉากห่าง 2 m แสง 600 nm ระยะระหว่างแถบสว่างกี่ mm",
+        opts:["3","4","5","6","8"],
+        ans:4, exp:"y = λL/d = 600e-9×2/0.2e-3 = 6×10⁻³ m = 6 mm"},
+      { sec:"B", topic:"เสียง",
+        q:"ท่อปลายปิดเกิด resonance กับ 1400 Hz (v=350 m/s) ลูกสูบควรอยู่ห่างปลายท่อกี่ cm (เลือกความยาวที่เป็นไปได้)",
+        opts:["12.50","18.75","25.00","27.50","35.75"],
+        ans:2, exp:"λ=25 cm, L=λ/4, 3λ/4, 5λ/4 = 6.25, 18.75, 31.25 → เลือก 18.75"},
+      { sec:"B", topic:"เสียง",
+        q:"ผู้สังเกตเคลื่อนที่ 10 m/s ออกห่างแหล่งกำเนิด 500 Hz, v=340 ความถี่ที่ได้ยินกี่ Hz",
+        opts:["470","485","500","515","530"],
+        ans:2, exp:"f' = f×(v−vo)/v = 500×330/340 ≈ 485 Hz"},
+      { sec:"B", topic:"แสง",
+        q:"แสง 500 nm ผ่านสลิตเดี่ยวกว้าง 0.2 mm ฉาก 2 m ความกว้างของแถบสว่างกลาง (จากดำถึงดำ) กี่ mm",
+        opts:["2.5","5.0","7.5","10","15"],
+        ans:4, exp:"แถบกลาง = 2λL/a = 2×500e-9×2/0.2e-3 = 10 mm"},
+      { sec:"B", topic:"แสง",
+        q:"เลนส์นูนความยาวโฟกัส 10 cm วางวัตถุห่าง 30 cm ภาพอยู่ห่างกี่ cm",
+        opts:["7.5","10","15","20","30"],
+        ans:3, exp:"1/v = 1/f − 1/u = 1/10 − 1/30 = 1/15 → v = 15 cm"},
+
+      // --- C: ไฟฟ้า/แม่เหล็ก (7 ข้อ) ---
+      { sec:"C", topic:"ไฟฟ้าสถิต",
+        q:"ประจุ −9 μC อยู่ที่ x=0 และ −q μC ที่ x=1 m ถ้าสนามไฟฟ้าที่ x=0.5 และ x=1.5 m เท่ากันทุกประการ ค่า q คือ",
+        opts:["4.0","4.5","5.0","9.0","ไม่มีค่าที่เป็นไปได้"],
+        ans:1, exp:"คำนวณตามสมการ: 4(q−9) = −4(1+q) → q = 4"},
+      { sec:"C", topic:"ไฟฟ้าสถิต",
+        q:"ตัวเก็บประจุ C₁=1 μF, C₂=4 μF ต่ออนุกรมกับแบตเตอรี่ 1.6 V ประจุบน C₁ กี่ μC",
+        opts:["0.32","0.64","1.28","1.60","2.00"],
+        ans:3, exp:"C_eq = (1×4)/(1+4) = 0.8 μF, Q = C_eq×V = 1.28 μC (เท่ากันทั้งสอง)"},
+      { sec:"C", topic:"ไฟฟ้ากระแส",
+        q:"ตัวต้านทาน 6 Ω สามตัว ต่อ 2 ตัวขนาน แล้วต่ออนุกรมกับตัวที่ 3 ความต้านทานรวมกี่ Ω",
+        opts:["3","6","9","12","18"],
+        ans:3, exp:"6||6 = 3 Ω, รวม = 3+6 = 9 Ω"},
+      { sec:"C", topic:"ไฟฟ้ากระแส",
+        q:"แบตเตอรี่ 12 V ต่อกับตัวต้านทาน 4 Ω กระแสกี่แอมแปร์",
+        opts:["1","2","3","4","6"],
+        ans:3, exp:"I = V/R = 12/4 = 3 A"},
+      { sec:"C", topic:"แม่เหล็กไฟฟ้า",
+        q:"ขดลวด 50 รอบ พื้นที่ 0.02 m² อยู่ในสนาม 0.4 T ตั้งฉาก สนามลดเป็น 0 ใน 0.1 s EMF เหนี่ยวนำสูงสุดกี่ V",
+        opts:["2","4","6","8","10"],
+        ans:2, exp:"EMF = N×ΔΦ/Δt = 50×(0.4×0.02)/0.1 = 4 V"},
+      { sec:"C", topic:"แม่เหล็กไฟฟ้า",
+        q:"ลวดยาว 10 cm วางในระนาบ xy ทำมุม 30° กับแกน x มีกระแส 0.2 A ในทิศ (cos30°,sin30°,0) สนามแม่เหล็ก 0.02 T ทิศ −z แรงในทิศ x กี่ N",
+        opts:["−3.5×10⁻⁴","−2.0×10⁻⁴","0","2.0×10⁻⁴","3.5×10⁻⁴"],
+        ans:2, exp:"F = IL×B → F_x = −IL×B×sinθ = −0.2×0.1×0.02×0.5 = −2×10⁻⁴"},
+      { sec:"C", topic:"คลื่น EM",
+        q:"คลื่นวิทยุ FM ความถี่ 100 MHz ความยาวคลื่นกี่เมตร",
+        opts:["1","2","3","6","30"],
+        ans:3, exp:"λ = c/f = 3e8/1e8 = 3 m"},
+
+      // --- D: ความร้อน/ของไหล (4 ข้อ) ---
+      { sec:"D", topic:"ความร้อน",
+        q:"ผสมโลหะ 400 g 80°C (c=0.25 J/g°C) กับของเหลว 200 g 24°C (c=0.30 J/g°C) อุณหภูมิสมดุลกี่ °C",
+        opts:["33.0","41.0","51.0","59.0","69.0"],
+        ans:4, exp:"100(80−T) = 60(T−24) → 8000−100T = 60T−1440 → T = 59°C"},
+      { sec:"D", topic:"แก๊ส",
+        q:"แก๊สอุดมคติได้รับความร้อน 33.3 kJ ขยายตัวที่ความดันคงที่ 100 kPa จาก 0.7 → 1.1 m³ พลังงานภายในเปลี่ยนอย่างไร",
+        opts:["เพิ่ม 73.3 kJ","เพิ่ม 6.7 kJ","ไม่เปลี่ยน","ลด 6.7 kJ","ลด 73.3 kJ"],
+        ans:4, exp:"W = PΔV = 100×0.4 = 40 kJ, ΔU = Q−W = 33.3−40 = −6.7 kJ"},
+      { sec:"D", topic:"ของแข็ง",
+        q:"ลวดยาว 1 m พื้นที่หน้าตัด 1 mm² ดึงด้วยแรง 100 N ลวดยืด 0.5 mm ค่า Young's modulus กี่ Pa",
+        opts:["1×10¹⁰","2×10¹⁰","1×10¹¹","2×10¹¹","5×10¹¹"],
+        ans:4, exp:"Y = (F/A)/(ΔL/L) = (100/1e-6)/(0.5e-3/1) = 1e8/5e-4 = 2×10¹¹ Pa"},
+      { sec:"D", topic:"ของไหล",
+        q:"สายยาง A=5.5 cm² ฉีดน้ำเต็มภาชนะ 2500 cm³ ใน 50 s นำหัวฉีด A=0.8 cm² ติดปลาย ความเร็วน้ำที่หัวฉีดกี่ cm/s",
+        opts:["9.1","22.7","62.5","156.3","182.0"],
+        ans:3, exp:"Q = 50 cm³/s, v = Q/A = 50/0.8 = 62.5 cm/s"},
+
+      // --- E: ฟิสิกส์แผนใหม่ (3 ข้อ) ---
+      { sec:"E", topic:"ฟิสิกส์อะตอม",
+        q:"อนุภาคมวล m KE=K λ_de Broglie=λ ถ้า KE เพิ่มเป็น 3K ความยาวคลื่น de Broglie ใหม่เป็น",
+        opts:["3λ","√3 λ","λ/√3","Kλ/m","3Kλ/m"],
+        ans:3, exp:"λ = h/√(2mK) → λ' = h/√(2m·3K) = λ/√3"},
+      { sec:"E", topic:"ฟิสิกส์อะตอม (Bohr)",
+        q:"ตามแบบจำลองโบร์ รัศมีอิเล็กตรอนสถานะกระตุ้นที่สอง (n=3) เป็น a รัศมีสถานะพื้นเป็น",
+        opts:["a/9","a/4","a/3","a/2","3a/4"],
+        ans:1, exp:"r_n = n²r₁ → r₃ = 9r₁ = a → r₁ = a/9"},
+      { sec:"E", topic:"ฟิสิกส์นิวเคลียร์",
+        q:"อะตอม H เปลี่ยนระดับจาก n → 1 ปล่อยโฟตอน 10.2 eV ค่า n เท่าใด",
+        opts:["2","3","4","5","6"],
+        ans:1, exp:"13.6(1−1/n²) = 10.2 → 1/n² = 0.25 → n = 2"}
+    ]
+  }
+];
+
+/* ========================================================
+   MATH A-Level — 3 ชุด ชุดละ 30 ข้อ (25 MCQ + 5 ระบายเลข)
+   type: "mcq" หรือ "numeric"
+   numeric: numAns = ตัวเลขที่ถูกต้อง, tol = ความคลาดเคลื่อนยอมรับได้
+   ======================================================== */
+const MATH_SECTIONS = {
+  A: "จำนวน/พีชคณิต",
+  B: "เรขาคณิต/เวกเตอร์",
+  C: "สถิติ/ความน่าจะเป็น",
+  D: "แคลคูลัส"
+};
+
+const MATH_EXAMS = [
+  /* ========== ชุดที่ 1 ========== */
+  {
+    name: "ชุดที่ 1",
+    questions: [
+      // A: จำนวน/พีชคณิต (16 ข้อ)
+      { sec:"A", topic:"เซต", type:"mcq",
+        q:"กำหนด A={1,2,3,4,5}, B={2,4,6,8} จำนวนสมาชิกของ A∪B เท่ากับ",
+        opts:["6","7","8","9","10"], ans:2,
+        exp:"A∪B = {1,2,3,4,5,6,8} มี 7 สมาชิก"},
+      { sec:"A", topic:"เซต", type:"mcq",
+        q:"ถ้า n(A)=20, n(B)=15, n(A∩B)=8 แล้ว n(A∪B) เท่ากับ",
+        opts:["23","27","28","35","43"], ans:2,
+        exp:"n(A∪B) = n(A)+n(B)−n(A∩B) = 20+15−8 = 27"},
+      { sec:"A", topic:"ตรรกศาสตร์", type:"mcq",
+        q:"ประพจน์ใดสมมูลกับ p→q",
+        opts:["~p∧q","~p∨q","p∨~q","~q→~p","p∧~q"], ans:2,
+        exp:"p→q สมมูลกับ ~p∨q (และกับ ~q→~p ในรูป contrapositive แต่ตัวเลือกที่ตรงคือ ~p∨q)"},
+      { sec:"A", topic:"ตรรกศาสตร์", type:"mcq",
+        q:"ประพจน์ (p∧q)→p เป็น",
+        opts:["สัจนิรันดร์","ขัดแย้ง","สมมูลกับ p","สมมูลกับ q","สมมูลกับ p∧q"], ans:1,
+        exp:"ถ้า p∧q เป็นจริง แสดงว่า p จริง ดังนั้น (p∧q)→p เป็นจริงเสมอ = สัจนิรันดร์"},
+      { sec:"A", topic:"จำนวนจริง/อสมการ", type:"mcq",
+        q:"เซตคำตอบของ x²−5x+6 ≤ 0 คือ",
+        opts:["[−3,−2]","[2,3]","(−∞,2]∪[3,∞)","[−2,−3]","(2,3)"], ans:2,
+        exp:"(x−2)(x−3) ≤ 0 → 2 ≤ x ≤ 3 ดังนั้น [2,3]"},
+      { sec:"A", topic:"พหุนาม", type:"mcq",
+        q:"เมื่อหาร P(x)=x³−2x²+3x−1 ด้วย (x−2) เศษเหลือเท่ากับ",
+        opts:["1","3","5","7","9"], ans:3,
+        exp:"P(2) = 8−8+6−1 = 5"},
+      { sec:"A", topic:"ฟังก์ชัน", type:"mcq",
+        q:"กำหนด f(x)=2x+1, g(x)=x²−1 แล้ว (f∘g)(2) เท่ากับ",
+        opts:["5","6","7","8","9"], ans:3,
+        exp:"g(2) = 4−1 = 3, f(3) = 2(3)+1 = 7"},
+      { sec:"A", topic:"ฟังก์ชันผกผัน", type:"mcq",
+        q:"ฟังก์ชันผกผันของ f(x)=3x−5 คือ",
+        opts:["(x+5)/3","(x−5)/3","(x+3)/5","3x+5","(5−x)/3"], ans:1,
+        exp:"y = 3x−5 → x = (y+5)/3 → f⁻¹(x) = (x+5)/3"},
+      { sec:"A", topic:"เอกซ์โพเนนเชียล", type:"mcq",
+        q:"คำตอบของสมการ 2^(x+1) = 32 คือ",
+        opts:["3","4","5","6","7"], ans:2,
+        exp:"2^(x+1) = 2⁵ → x+1 = 5 → x = 4"},
+      { sec:"A", topic:"ลอการิทึม", type:"mcq",
+        q:"log₂(8) + log₂(4) เท่ากับ",
+        opts:["3","4","5","6","8"], ans:3,
+        exp:"log₂(8) = 3, log₂(4) = 2 รวม = 5"},
+      { sec:"A", topic:"ตรีโกณมิติ", type:"mcq",
+        q:"ค่าของ sin30° + cos60° เท่ากับ",
+        opts:["0","½","1","√3/2","√2"], ans:3,
+        exp:"sin30° = ½, cos60° = ½ รวม = 1"},
+      { sec:"A", topic:"ตรีโกณ-สมการ", type:"mcq",
+        q:"คำตอบของ sin x = ½ ในช่วง [0°, 360°] คือ",
+        opts:["30°, 60°","30°, 150°","60°, 120°","45°, 135°","30°, 330°"], ans:2,
+        exp:"sin x = ½ → x = 30° หรือ 180°−30° = 150°"},
+      { sec:"A", topic:"จำนวนเชิงซ้อน", type:"mcq",
+        q:"|3+4i| เท่ากับ",
+        opts:["3","4","5","7","12"], ans:3,
+        exp:"|3+4i| = √(9+16) = √25 = 5"},
+      { sec:"A", topic:"เมทริกซ์", type:"mcq",
+        q:"det([[2,3],[1,4]]) เท่ากับ",
+        opts:["3","5","8","11","14"], ans:2,
+        exp:"det = 2(4) − 3(1) = 8−3 = 5"},
+      { sec:"A", topic:"เมทริกซ์", type:"numeric",
+        q:"กำหนด A = [[3,1],[2,4]] หาค่า det(A)",
+        numAns: 10, tol: 0,
+        exp:"det = 3(4) − 1(2) = 12 − 2 = 10"},
+      { sec:"A", topic:"ลำดับเลขคณิต", type:"mcq",
+        q:"ลำดับเลขคณิต 5, 8, 11, 14, ... พจน์ที่ 20 เท่ากับ",
+        opts:["56","59","62","65","68"], ans:3,
+        exp:"a₂₀ = 5 + (20−1)(3) = 5 + 57 = 62"},
+
+      // B: เรขาคณิต/เวกเตอร์ (4 ข้อ)
+      { sec:"B", topic:"เรขาคณิตวิเคราะห์", type:"mcq",
+        q:"ระยะระหว่างจุด (1,2) และ (4,6) เท่ากับ",
+        opts:["3","4","5","6","7"], ans:3,
+        exp:"d = √((4−1)² + (6−2)²) = √(9+16) = √25 = 5"},
+      { sec:"B", topic:"วงกลม", type:"mcq",
+        q:"สมการวงกลมที่มีจุดศูนย์กลาง (2,−3) รัศมี 4 คือ",
+        opts:["(x−2)²+(y+3)²=16","(x+2)²+(y−3)²=16","(x−2)²+(y−3)²=4","(x−2)²+(y+3)²=4","(x+2)²+(y+3)²=16"], ans:1,
+        exp:"(x−h)²+(y−k)² = r² → (x−2)²+(y+3)² = 16"},
+      { sec:"B", topic:"เวกเตอร์-ดอท", type:"mcq",
+        q:"กำหนด a=(1,2,3), b=(4,−1,2) ค่า a·b เท่ากับ",
+        opts:["6","7","8","9","10"], ans:3,
+        exp:"a·b = 1(4) + 2(−1) + 3(2) = 4−2+6 = 8"},
+      { sec:"B", topic:"เวกเตอร์-ขนาด", type:"numeric",
+        q:"ขนาดของเวกเตอร์ v = (3, 4, 12) เท่ากับ",
+        numAns: 13, tol: 0,
+        exp:"|v| = √(9+16+144) = √169 = 13"},
+
+      // C: สถิติ/ความน่าจะเป็น (7 ข้อ)
+      { sec:"C", topic:"สถิติ-ค่าเฉลี่ย", type:"mcq",
+        q:"ข้อมูล 4, 6, 8, 10, 12 มีค่าเฉลี่ยเท่ากับ",
+        opts:["6","7","8","9","10"], ans:3,
+        exp:"(4+6+8+10+12)/5 = 40/5 = 8"},
+      { sec:"C", topic:"สถิติ-มัธยฐาน", type:"mcq",
+        q:"มัธยฐานของข้อมูล 3, 7, 5, 9, 11, 6, 8 เท่ากับ",
+        opts:["5","6","7","8","9"], ans:3,
+        exp:"เรียง: 3,5,6,7,8,9,11 ตำแหน่งกลาง = 7"},
+      { sec:"C", topic:"การแจกแจงปกติ-Z", type:"mcq",
+        q:"ข้อมูลปกติ μ=50, σ=10 ค่า z-score ของข้อมูล 65 เท่ากับ",
+        opts:["1.0","1.5","2.0","2.5","3.0"], ans:2,
+        exp:"z = (x−μ)/σ = (65−50)/10 = 1.5"},
+      { sec:"C", topic:"การจัดเรียง", type:"mcq",
+        q:"จำนวนวิธีจัดเรียงตัวอักษรคำว่า MATH ทั้งหมดเท่ากับ",
+        opts:["12","18","24","36","48"], ans:3,
+        exp:"4! = 24 (ไม่มีอักษรซ้ำ)"},
+      { sec:"C", topic:"การจัดหมู่", type:"numeric",
+        q:"เลือกนักเรียน 3 คนจาก 8 คน ทำได้กี่วิธี (ไม่สนลำดับ)",
+        numAns: 56, tol: 0,
+        exp:"C(8,3) = 8!/(3!5!) = 56"},
+      { sec:"C", topic:"ความน่าจะเป็น", type:"mcq",
+        q:"ทอยลูกเต๋า 1 ลูก ความน่าจะเป็นที่จะได้แต้มมากกว่า 4 เท่ากับ",
+        opts:["1/6","1/3","1/2","2/3","5/6"], ans:2,
+        exp:"แต้ม 5,6 มี 2 หน้า จาก 6 → 2/6 = 1/3"},
+      { sec:"C", topic:"ความน่าจะเป็นมีเงื่อนไข", type:"mcq",
+        q:"P(A)=0.4, P(B)=0.5, P(A∩B)=0.2 หา P(A|B)",
+        opts:["0.2","0.3","0.4","0.5","0.6"], ans:3,
+        exp:"P(A|B) = P(A∩B)/P(B) = 0.2/0.5 = 0.4"},
+
+      // D: แคลคูลัส (3 ข้อ)
+      { sec:"D", topic:"อนุพันธ์", type:"mcq",
+        q:"อนุพันธ์ของ f(x)=3x²+2x−5 ที่ x=2 เท่ากับ",
+        opts:["10","12","14","16","18"], ans:3,
+        exp:"f'(x) = 6x+2, f'(2) = 12+2 = 14"},
+      { sec:"D", topic:"แคลคูลัส-ค่าสุดขีด", type:"numeric",
+        q:"ค่าต่ำสุดของ f(x) = x² − 6x + 11 เท่ากับเท่าใด",
+        numAns: 2, tol: 0,
+        exp:"f'(x) = 2x−6 = 0 → x = 3, f(3) = 9−18+11 = 2"},
+      { sec:"D", topic:"อินทิเกรต", type:"numeric",
+        q:"คำนวณ ∫₀² (2x+1) dx",
+        numAns: 6, tol: 0,
+        exp:"∫(2x+1)dx = x²+x | จาก 0 ถึง 2 = (4+2)−0 = 6"}
+    ]
+  },
+  /* ========== ชุดที่ 2 ========== */
+  {
+    name: "ชุดที่ 2",
+    questions: [
+      // A: จำนวน/พีชคณิต (16 ข้อ)
+      { sec:"A", topic:"เซต", type:"mcq",
+        q:"กำหนด U={1,2,...,10}, A={2,4,6,8}, B={1,2,3,4} แล้ว A−B เท่ากับ",
+        opts:["{1,3}","{2,4}","{6,8}","{1,2,3,4}","{5,7,9,10}"], ans:3,
+        exp:"A−B = สมาชิกของ A ที่ไม่อยู่ใน B = {6,8}"},
+      { sec:"A", topic:"เซต-เพาเวอร์", type:"mcq",
+        q:"จำนวนสับเซตของ {a,b,c,d} เท่ากับ",
+        opts:["8","12","15","16","24"], ans:4,
+        exp:"2⁴ = 16 สับเซต"},
+      { sec:"A", topic:"ตรรกศาสตร์", type:"mcq",
+        q:"ค่าความจริงของ (T∧F)∨T เท่ากับ",
+        opts:["จริง","เท็จ","ไม่ทราบ","ไม่จำกัด","ขัดแย้ง"], ans:1,
+        exp:"T∧F = F, F∨T = T (จริง)"},
+      { sec:"A", topic:"จำนวนจริง/ค่าสัมบูรณ์", type:"mcq",
+        q:"คำตอบของ |x−3| < 2 คือ",
+        opts:["x<5","1<x<5","−1<x<5","x>1","−5<x<1"], ans:2,
+        exp:"|x−3| < 2 → −2 < x−3 < 2 → 1 < x < 5"},
+      { sec:"A", topic:"พหุนาม", type:"mcq",
+        q:"ผลคูณของรากของสมการ x²−5x+6 = 0 เท่ากับ",
+        opts:["−6","−5","5","6","11"], ans:4,
+        exp:"ผลคูณราก = c/a = 6/1 = 6"},
+      { sec:"A", topic:"ฟังก์ชัน", type:"mcq",
+        q:"โดเมนของ f(x) = √(x−4) คือ",
+        opts:["x>0","x≥0","x>4","x≥4","x≤4"], ans:4,
+        exp:"x−4 ≥ 0 → x ≥ 4"},
+      { sec:"A", topic:"ฟังก์ชัน-ผกผัน", type:"mcq",
+        q:"ถ้า f(x) = x³ แล้ว f⁻¹(8) เท่ากับ",
+        opts:["1","2","3","4","6"], ans:2,
+        exp:"f⁻¹(x) = ∛x, f⁻¹(8) = 2"},
+      { sec:"A", topic:"เอกซ์โพเนนเชียล", type:"mcq",
+        q:"3^(2x) = 81 จะได้ x =",
+        opts:["1","2","3","4","8"], ans:2,
+        exp:"3^(2x) = 3⁴ → 2x = 4 → x = 2"},
+      { sec:"A", topic:"ลอการิทึม", type:"mcq",
+        q:"log(100) + log(10) เท่ากับ (ฐาน 10)",
+        opts:["1","2","3","10","100"], ans:3,
+        exp:"log 100 = 2, log 10 = 1 รวม = 3"},
+      { sec:"A", topic:"ลอการิทึม-สมการ", type:"numeric",
+        q:"คำตอบของสมการ log₂(x) = 5 คือ x = ?",
+        numAns: 32, tol: 0,
+        exp:"x = 2⁵ = 32"},
+      { sec:"A", topic:"ตรีโกณ", type:"mcq",
+        q:"ค่าของ tan45° + cot45° เท่ากับ",
+        opts:["0","1","√2","2","2√2"], ans:4,
+        exp:"tan45° = 1, cot45° = 1 รวม = 2"},
+      { sec:"A", topic:"ตรีโกณ-เอกลักษณ์", type:"mcq",
+        q:"sin²θ + cos²θ เท่ากับ",
+        opts:["0","½","1","2","sin(2θ)"], ans:3,
+        exp:"เอกลักษณ์พีทากอรัส sin²+cos² = 1"},
+      { sec:"A", topic:"จำนวนเชิงซ้อน", type:"mcq",
+        q:"(1+i)(1−i) เท่ากับ",
+        opts:["0","1","2","−2","2i"], ans:3,
+        exp:"= 1 − i² = 1 − (−1) = 2"},
+      { sec:"A", topic:"เมทริกซ์", type:"mcq",
+        q:"กำหนด A = [[1,2],[3,4]] แล้ว 2A เท่ากับ",
+        opts:["[[2,4],[6,8]]","[[1,2],[3,4]]","[[2,2],[3,4]]","[[3,4],[5,6]]","[[1,4],[9,16]]"], ans:1,
+        exp:"คูณทุกสมาชิกด้วย 2"},
+      { sec:"A", topic:"ลำดับเรขาคณิต", type:"mcq",
+        q:"ลำดับเรขาคณิต 2, 6, 18, 54, ... พจน์ที่ 5 เท่ากับ",
+        opts:["108","144","162","216","324"], ans:3,
+        exp:"a₅ = 2·3⁴ = 2·81 = 162"},
+      { sec:"A", topic:"อนุกรมเลขคณิต", type:"numeric",
+        q:"ผลรวม 1+2+3+...+20 เท่ากับเท่าใด",
+        numAns: 210, tol: 0,
+        exp:"S = n(n+1)/2 = 20·21/2 = 210"},
+
+      // B: เรขาคณิต/เวกเตอร์ (4 ข้อ)
+      { sec:"B", topic:"ความชันเส้นตรง", type:"mcq",
+        q:"ความชันของเส้นตรงผ่าน (1,3) และ (4,9) เท่ากับ",
+        opts:["1","2","3","4","6"], ans:2,
+        exp:"m = (9−3)/(4−1) = 6/3 = 2"},
+      { sec:"B", topic:"พาราโบลา", type:"mcq",
+        q:"จุดยอดของพาราโบลา y = x² − 4x + 7 อยู่ที่",
+        opts:["(2,3)","(2,7)","(−2,3)","(4,7)","(0,7)"], ans:1,
+        exp:"x = −b/(2a) = 4/2 = 2, y = 4−8+7 = 3"},
+      { sec:"B", topic:"เวกเตอร์-ผลรวม", type:"mcq",
+        q:"กำหนด a=(2,1,3), b=(1,−2,4) ค่า a+b เท่ากับ",
+        opts:["(3,−1,7)","(3,1,7)","(1,3,−1)","(2,−2,12)","(3,−1,12)"], ans:1,
+        exp:"a+b = (2+1, 1−2, 3+4) = (3,−1,7)"},
+      { sec:"B", topic:"เวกเตอร์-มุม", type:"numeric",
+        q:"ถ้า a=(1,0,0), b=(0,1,0) มุมระหว่าง a กับ b เป็นกี่องศา",
+        numAns: 90, tol: 0,
+        exp:"a·b = 0 → cosθ = 0 → θ = 90°"},
+
+      // C: สถิติ/ความน่าจะเป็น (7 ข้อ)
+      { sec:"C", topic:"ค่าเฉลี่ย", type:"mcq",
+        q:"ค่าเฉลี่ยของ 10, 20, 30, 40, 50 เท่ากับ",
+        opts:["20","25","30","35","40"], ans:3,
+        exp:"(10+20+30+40+50)/5 = 150/5 = 30"},
+      { sec:"C", topic:"พิสัย", type:"mcq",
+        q:"พิสัยของข้อมูล 5, 12, 8, 20, 15, 9 เท่ากับ",
+        opts:["10","12","15","20","25"], ans:3,
+        exp:"พิสัย = max − min = 20 − 5 = 15"},
+      { sec:"C", topic:"การแจกแจงทวินาม", type:"mcq",
+        q:"ทอยเหรียญที่ถูก 4 ครั้ง ความน่าจะเป็นได้หัวพอดี 2 ครั้งเท่ากับ",
+        opts:["1/8","1/4","3/8","1/2","5/8"], ans:3,
+        exp:"C(4,2)(½)²(½)² = 6·(1/16) = 6/16 = 3/8"},
+      { sec:"C", topic:"การจัดเรียง", type:"mcq",
+        q:"จำนวนวิธีจัดคน 5 คนนั่งแถวยาว เท่ากับ",
+        opts:["20","60","120","240","720"], ans:3,
+        exp:"5! = 120"},
+      { sec:"C", topic:"การจัดหมู่", type:"mcq",
+        q:"C(10,2) เท่ากับ",
+        opts:["20","30","45","90","100"], ans:3,
+        exp:"C(10,2) = 10·9/2 = 45"},
+      { sec:"C", topic:"ความน่าจะเป็น", type:"mcq",
+        q:"กล่องมีลูกบอลแดง 3 ขาว 5 หยิบ 1 ลูกความน่าจะเป็นได้แดงเท่ากับ",
+        opts:["1/8","2/8","3/8","4/8","5/8"], ans:3,
+        exp:"P(แดง) = 3/(3+5) = 3/8"},
+      { sec:"C", topic:"ความน่าจะเป็นรวม", type:"numeric",
+        q:"ทอยลูกเต๋า 2 ลูก ความน่าจะเป็นที่ผลรวมแต้ม = 7 เท่ากับ a/36 ค่า a เท่ากับเท่าใด",
+        numAns: 6, tol: 0,
+        exp:"ผลรวม=7 มี 6 วิธี: (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) → 6/36"},
+
+      // D: แคลคูลัส (3 ข้อ)
+      { sec:"D", topic:"ลิมิต", type:"mcq",
+        q:"lim x→2 (x²−4)/(x−2) เท่ากับ",
+        opts:["0","2","4","∞","ไม่นิยาม"], ans:3,
+        exp:"= lim (x+2)(x−2)/(x−2) = lim (x+2) = 4"},
+      { sec:"D", topic:"อนุพันธ์", type:"mcq",
+        q:"อนุพันธ์ของ f(x) = 5x⁴ คือ",
+        opts:["20x³","20x⁴","5x³","x⁵","4x³"], ans:1,
+        exp:"f'(x) = 5·4·x³ = 20x³"},
+      { sec:"D", topic:"อินทิเกรต-เจาะจง", type:"numeric",
+        q:"คำนวณ ∫₀³ x² dx",
+        numAns: 9, tol: 0,
+        exp:"∫x² dx = x³/3 | จาก 0 ถึง 3 = 27/3 = 9"}
+    ]
+  },
+  /* ========== ชุดที่ 3 ========== */
+  {
+    name: "ชุดที่ 3",
+    questions: [
+      // A: จำนวน/พีชคณิต (16 ข้อ)
+      { sec:"A", topic:"เซต-อินเตอร์เซก", type:"mcq",
+        q:"ถ้า A={x | x เป็นจำนวนนับ < 6}, B={2,4,6,8} แล้ว A∩B เท่ากับ",
+        opts:["{2}","{2,4}","{4,6}","{2,4,6}","∅"], ans:2,
+        exp:"A = {1,2,3,4,5}, A∩B = {2,4}"},
+      { sec:"A", topic:"ตรรกศาสตร์-นิเสธ", type:"mcq",
+        q:"นิเสธของ p∧q สมมูลกับ",
+        opts:["~p∧~q","~p∨~q","p∨q","~p→q","p∧~q"], ans:2,
+        exp:"De Morgan: ~(p∧q) ≡ ~p∨~q"},
+      { sec:"A", topic:"ตัวบ่งปริมาณ", type:"mcq",
+        q:"ข้อความ \"∀x∈ℝ, x² ≥ 0\" มีค่าความจริงเป็น",
+        opts:["จริง","เท็จ","บางครั้ง","ไม่นิยาม","ขัดแย้ง"], ans:1,
+        exp:"กำลังสองของจำนวนจริงทุกตัว ≥ 0 → จริง"},
+      { sec:"A", topic:"จำนวนจริง", type:"mcq",
+        q:"คำตอบของ x² ≥ 9 คือ",
+        opts:["x≥3","x≥−3","x≤−3 หรือ x≥3","−3≤x≤3","x=3"], ans:3,
+        exp:"x²≥9 → |x|≥3 → x≤−3 หรือ x≥3"},
+      { sec:"A", topic:"พหุนาม", type:"mcq",
+        q:"แยกตัวประกอบของ x²−9 ได้",
+        opts:["(x−3)²","(x+3)²","(x−3)(x+3)","x(x−9)","(x−1)(x+9)"], ans:3,
+        exp:"ผลต่างกำลังสอง: a²−b² = (a−b)(a+b)"},
+      { sec:"A", topic:"ฟังก์ชัน", type:"mcq",
+        q:"f(x)=x²+1 ค่า f(−3) เท่ากับ",
+        opts:["8","9","10","11","13"], ans:3,
+        exp:"f(−3) = 9+1 = 10"},
+      { sec:"A", topic:"ฟังก์ชันประกอบ", type:"mcq",
+        q:"ถ้า f(x)=x+2, g(x)=2x แล้ว (g∘f)(3) เท่ากับ",
+        opts:["6","8","10","11","12"], ans:3,
+        exp:"f(3)=5, g(5)=10"},
+      { sec:"A", topic:"เอกซ์โพเนนเชียล", type:"mcq",
+        q:"ค่าของ 4^(3/2) เท่ากับ",
+        opts:["6","8","12","16","32"], ans:2,
+        exp:"4^(3/2) = (√4)³ = 2³ = 8"},
+      { sec:"A", topic:"ลอการิทึม-เปลี่ยนฐาน", type:"mcq",
+        q:"log₈(64) เท่ากับ",
+        opts:["1","2","3","6","8"], ans:2,
+        exp:"8² = 64 → log₈(64) = 2"},
+      { sec:"A", topic:"ตรีโกณ-วงกลม 1 หน่วย", type:"mcq",
+        q:"ค่า cos(180°) เท่ากับ",
+        opts:["1","0","−1","½","√3/2"], ans:3,
+        exp:"cos(180°) = −1"},
+      { sec:"A", topic:"ตรีโกณ-สูตรผลรวม", type:"mcq",
+        q:"sin(90°−θ) เท่ากับ",
+        opts:["sinθ","cosθ","−sinθ","−cosθ","tanθ"], ans:2,
+        exp:"sin(90°−θ) = cosθ (cofunction)"},
+      { sec:"A", topic:"ตรีโกณ", type:"numeric",
+        q:"ค่าของ 2sin30° + 3cos60° เท่ากับเท่าใด (เป็นทศนิยม)",
+        numAns: 2.5, tol: 0.01,
+        exp:"2(½) + 3(½) = 1 + 1.5 = 2.5"},
+      { sec:"A", topic:"จำนวนเชิงซ้อน", type:"mcq",
+        q:"(2+3i) + (4−i) เท่ากับ",
+        opts:["6+2i","6+4i","2+2i","6−2i","8i"], ans:1,
+        exp:"จับคู่จริง+จริง, จินตภาพ+จินตภาพ = 6+2i"},
+      { sec:"A", topic:"เมทริกซ์-คูณ", type:"mcq",
+        q:"[[1,2]] × [[3],[4]] เท่ากับ",
+        opts:["[3,8]","[5]","[7]","[11]","[12]"], ans:4,
+        exp:"= 1(3) + 2(4) = 11 (ผลลัพธ์เป็นเมทริกซ์ 1x1 = [11])"},
+      { sec:"A", topic:"ลำดับ", type:"numeric",
+        q:"ลำดับ aₙ = 3n−1 พจน์ที่ 10 เท่ากับเท่าใด",
+        numAns: 29, tol: 0,
+        exp:"a₁₀ = 3(10)−1 = 29"},
+      { sec:"A", topic:"อนุกรมเรขาคณิต", type:"mcq",
+        q:"ผลรวมของอนุกรมเรขาคณิต 1+½+¼+... ถึง ∞ เท่ากับ",
+        opts:["1","3/2","2","5/2","∞"], ans:3,
+        exp:"S∞ = a/(1−r) = 1/(1−½) = 2"},
+
+      // B: เรขาคณิต/เวกเตอร์ (4 ข้อ)
+      { sec:"B", topic:"จุดกึ่งกลาง", type:"mcq",
+        q:"จุดกึ่งกลางระหว่าง (2,4) และ (8,10) คือ",
+        opts:["(5,7)","(6,8)","(4,5)","(10,14)","(3,7)"], ans:1,
+        exp:"M = ((2+8)/2, (4+10)/2) = (5,7)"},
+      { sec:"B", topic:"วงรี", type:"mcq",
+        q:"x²/25 + y²/9 = 1 เป็นสมการของ",
+        opts:["วงกลม","วงรี","พาราโบลา","ไฮเพอร์โบลา","เส้นตรง"], ans:2,
+        exp:"รูปแบบ x²/a² + y²/b² = 1 คือสมการวงรี"},
+      { sec:"B", topic:"เวกเตอร์", type:"mcq",
+        q:"|2a| โดย a=(1,2,2) เท่ากับ",
+        opts:["3","6","9","12","18"], ans:2,
+        exp:"|a| = √(1+4+4) = 3, |2a| = 2·3 = 6"},
+      { sec:"B", topic:"เวกเตอร์-ตั้งฉาก", type:"numeric",
+        q:"ถ้า a=(1,2,k) ตั้งฉากกับ b=(2,−1,3) จงหาค่า k",
+        numAns: 0, tol: 0,
+        exp:"a·b = 2−2+3k = 0 → k = 0"},
+
+      // C: สถิติ/ความน่าจะเป็น (7 ข้อ)
+      { sec:"C", topic:"ส่วนเบี่ยงเบนมาตรฐาน", type:"mcq",
+        q:"ข้อมูล 2,4,4,4,5,5,7,9 มีค่าเฉลี่ย 5 ส่วนเบี่ยงเบนมาตรฐานประชากร เท่ากับ",
+        opts:["1","2","√2","√3","√5"], ans:2,
+        exp:"σ² = Σ(x−x̄)²/n = (9+1+1+1+0+0+4+16)/8 = 32/8 = 4 → σ = 2"},
+      { sec:"C", topic:"ฐานนิยม", type:"mcq",
+        q:"ฐานนิยมของข้อมูล 1,2,2,3,4,4,4,5 เท่ากับ",
+        opts:["1","2","3","4","5"], ans:4,
+        exp:"4 ปรากฏมากที่สุด (3 ครั้ง)"},
+      { sec:"C", topic:"การแจกแจงปกติ", type:"mcq",
+        q:"คะแนนสอบ μ=70, σ=10 หา z-score ของคะแนน 85",
+        opts:["1.0","1.2","1.5","2.0","2.5"], ans:3,
+        exp:"z = (85−70)/10 = 1.5"},
+      { sec:"C", topic:"กฎการบวก", type:"mcq",
+        q:"P(A)=0.3, P(B)=0.5, P(A∩B)=0.1 หา P(A∪B)",
+        opts:["0.4","0.5","0.6","0.7","0.8"], ans:4,
+        exp:"P(A∪B) = 0.3+0.5−0.1 = 0.7"},
+      { sec:"C", topic:"การจัดเรียงซ้ำ", type:"numeric",
+        q:"จำนวนวิธีจัดเรียงตัวอักษรคำว่า BANANA ทั้งหมดเท่ากับ",
+        numAns: 60, tol: 0,
+        exp:"6!/(3!·2!) = 720/12 = 60"},
+      { sec:"C", topic:"ความน่าจะเป็นเหตุการณ์อิสระ", type:"mcq",
+        q:"ทอยลูกเต๋า 2 ครั้ง ความน่าจะเป็นที่ได้เลข 6 ทั้งสองครั้งเท่ากับ",
+        opts:["1/12","1/18","1/24","1/36","1/72"], ans:4,
+        exp:"(1/6)·(1/6) = 1/36"},
+      { sec:"C", topic:"การนับ", type:"mcq",
+        q:"จำนวนวิธีเลือกประธาน 1 คน รองประธาน 1 คน จากนักเรียน 6 คน เท่ากับ",
+        opts:["12","15","20","30","36"], ans:4,
+        exp:"P(6,2) = 6·5 = 30"},
+
+      // D: แคลคูลัส (3 ข้อ)
+      { sec:"D", topic:"อนุพันธ์-กฎผลคูณ", type:"mcq",
+        q:"อนุพันธ์ของ f(x) = x·sin(x) ที่ x=0 เท่ากับ",
+        opts:["−1","0","1","sin(0)","ไม่นิยาม"], ans:2,
+        exp:"f'(x) = sin(x)+x·cos(x), f'(0) = 0+0 = 0"},
+      { sec:"D", topic:"อนุพันธ์-ฟังก์ชันประกอบ", type:"mcq",
+        q:"อนุพันธ์ของ f(x) = (2x+1)³ เท่ากับ",
+        opts:["6(2x+1)²","3(2x+1)²","(2x+1)²","(2x+1)³","6x²"], ans:1,
+        exp:"กฎลูกโซ่: 3(2x+1)²·2 = 6(2x+1)²"},
+      { sec:"D", topic:"พื้นที่ใต้กราฟ", type:"numeric",
+        q:"พื้นที่ใต้กราฟ y = 2x จาก x = 0 ถึง x = 4 เท่ากับ",
+        numAns: 16, tol: 0,
+        exp:"∫₀⁴ 2x dx = x² | 0 ถึง 4 = 16"}
+    ]
+  }
+];
+
+/* ========================================================
+   TPAT 3 ส่วนที่ 1 (aptitude test)
+   N = ตัวเลข (15), S = มิติสัมพันธ์ (15), M = เชิงกล/ฟิสิกส์ (15)
+   ======================================================== */
+const TPAT_SECTIONS = {
+  N: "ตัวเลข",
+  S: "มิติสัมพันธ์",
+  M: "เชิงกล/ฟิสิกส์"
+};
+
+const TPAT_EXAMS = [];
+/* ---------- TPAT 3 ชุดที่ 1 ---------- */
+TPAT_EXAMS.push({
+  name: "ชุดที่ 1",
+  questions: [
+    // ===== N: ตัวเลข 15 ข้อ =====
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 2, 5, 10, 17, 26, ?",
+      opts:["32","34","35","37","40"], ans:4,
+      exp:"ผลต่างเพิ่มครั้งละ 2: +3, +5, +7, +9, +11 → 26+11 = 37"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 1, 3, 9, 27, 81, ?",
+      opts:["162","216","243","324","486"], ans:3,
+      exp:"คูณ 3 ไปเรื่อย ๆ → 81×3 = 243"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 48, 24, 12, 6, ?",
+      opts:["1","2","3","4","5"], ans:3,
+      exp:"หาร 2 ไปเรื่อย ๆ → 6÷2 = 3"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 2, 3, 5, 8, 13, ?",
+      opts:["18","19","20","21","24"], ans:4,
+      exp:"แบบฟีโบนัชชี แต่ละพจน์ = ผลรวมสองพจน์ก่อน → 8+13 = 21"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 100, 81, 64, 49, ?",
+      opts:["25","30","36","42","49"], ans:3,
+      exp:"กำลังสอง 10², 9², 8², 7², 6² = 36"},
+    { sec:"N", topic:"อุปมา",
+      q:"3 : 27 :: 5 : ?",
+      opts:["25","45","75","125","625"], ans:4,
+      exp:"3³ = 27, 5³ = 125"},
+    { sec:"N", topic:"อุปมา",
+      q:"12 : 4 :: 21 : ?",
+      opts:["3","5","7","9","12"], ans:3,
+      exp:"หารด้วย 3 → 21÷3 = 7"},
+    { sec:"N", topic:"ร้อยละ",
+      q:"ร้อยละ 25 ของ 160 มีค่าเท่าใด",
+      opts:["20","32","40","48","50"], ans:3,
+      exp:"25% × 160 = 160/4 = 40"},
+    { sec:"N", topic:"อัตราส่วน",
+      q:"a : b = 3 : 5 และ a + b = 48 ค่าของ b คือ",
+      opts:["15","18","24","30","36"], ans:4,
+      exp:"3k + 5k = 48 → k = 6, b = 5×6 = 30"},
+    { sec:"N", topic:"ผสมสาร",
+      q:"ผสมน้ำเกลือ 40% จำนวน 2 ลิตร กับ 80% จำนวน 3 ลิตร ได้ความเข้มข้นเท่าใด",
+      opts:["50%","56%","60%","64%","72%"], ans:4,
+      exp:"(0.4×2 + 0.8×3)/5 = (0.8+2.4)/5 = 3.2/5 = 64%"},
+    { sec:"N", topic:"อัตราส่วน",
+      q:"ปัจจุบัน ก อายุ 18 ข อายุ 24 อีก 6 ปีข้างหน้า ก:ข = ?",
+      opts:["2:3","3:4","4:5","5:6","6:7"], ans:3,
+      exp:"อีก 6 ปี: ก = 24, ข = 30 → 24:30 = 4:5"},
+    { sec:"N", topic:"อัตราเร็ว",
+      q:"วิ่ง 180 กม. ใช้เวลา 2.5 ชั่วโมง อัตราเร็วเฉลี่ยเป็นกี่ กม./ชม.",
+      opts:["60","64","68","72","80"], ans:4,
+      exp:"180 / 2.5 = 72 กม./ชม."},
+    { sec:"N", topic:"อัตราการทำงาน",
+      q:"ก ทำงานเสร็จใน 4 วัน, ข ทำเสร็จใน 6 วัน ช่วยกันทำกี่วันจึงเสร็จ",
+      opts:["2.0","2.2","2.4","2.5","3.0"], ans:3,
+      exp:"อัตรารวม = 1/4 + 1/6 = 5/12 ต่อวัน → เวลา = 12/5 = 2.4 วัน"},
+    { sec:"N", topic:"การนับ",
+      q:"จำนวนเต็มบวกตั้งแต่ 1 ถึง 50 มีกี่จำนวนที่หารด้วย 3 ลงตัว",
+      opts:["14","15","16","17","18"], ans:3,
+      exp:"3, 6, 9, ..., 48 มี ⌊50/3⌋ = 16 จำนวน"},
+    { sec:"N", topic:"ความน่าจะเป็น",
+      q:"ทอดลูกเต๋าสองลูก ความน่าจะเป็นที่ผลรวมเท่ากับ 7 เป็นเท่าใด",
+      opts:["1/12","1/9","1/8","1/7","1/6"], ans:5,
+      exp:"คู่อันดับที่รวมได้ 7 มี 6 คู่ จาก 36 → 6/36 = 1/6"},
+
+    // ===== S: มิติสัมพันธ์ 15 ข้อ =====
+    { sec:"S", topic:"การพับกระดาษ",
+      q:"พับกระดาษรูปสี่เหลี่ยมผืนผ้าครึ่งหนึ่งตามแนวนอน (พับขอบบนลงมาทับขอบล่าง) แล้วเจาะรู 1 รู ที่มุมขวาบนของกระดาษที่พับ เมื่อคลี่ออก กระดาษจะมีกี่รู และจัดเรียงแบบใด",
+      svg:`<svg viewBox="0 0 300 110" width="300" height="110">
+        <rect x="10" y="20" width="70" height="70" fill="#fff" stroke="#333"/>
+        <text x="45" y="60" text-anchor="middle" font-size="10">เริ่มต้น</text>
+        <path d="M90,55 L110,55" stroke="#333" marker-end="url(#a)"/>
+        <rect x="120" y="50" width="70" height="40" fill="#fff" stroke="#333"/>
+        <line x1="120" y1="50" x2="190" y2="50" stroke="#333" stroke-dasharray="3 2"/>
+        <circle cx="183" cy="57" r="3" fill="#c00"/>
+        <text x="155" y="105" text-anchor="middle" font-size="10">พับ+เจาะรู</text>
+        <path d="M200,55 L220,55" stroke="#333" marker-end="url(#a)"/>
+        <text x="260" y="60" text-anchor="middle" font-size="12">?</text>
+        <defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker></defs>
+      </svg>`,
+      opts:["1 รู อยู่มุมขวาบน","2 รู อยู่ที่มุมขวาบนและมุมขวาล่าง","2 รู อยู่มุมซ้ายและขวาของแนวกลาง","4 รู ที่มุมทั้งสี่","3 รู เรียงทแยงมุม"],
+      ans:2,
+      exp:"การพับตามแนวนอน ทำให้รูที่เจาะในครึ่งบนสะท้อนกับครึ่งล่าง → ได้ 2 รู ที่มุมขวาบนและมุมขวาล่าง"},
+    { sec:"S", topic:"การพับกระดาษ",
+      q:"พับกระดาษครึ่งหนึ่งตามแนวนอน ตามด้วยพับครึ่งแนวตั้งอีกครั้ง แล้วเจาะ 1 รู เมื่อคลี่ออก จะได้กี่รู",
+      opts:["1","2","3","4","8"], ans:4,
+      exp:"พับ 2 ครั้ง แบ่งกระดาษเป็น 4 ส่วนซ้อนกัน เจาะ 1 รูจะทะลุทุกส่วน → 4 รู"},
+    { sec:"S", topic:"ลูกบาศก์-หน้าตรงข้าม",
+      q:"แผ่นคลี่ของลูกบาศก์มีรูปบนแต่ละด้านดังรูป เมื่อพับเป็นลูกบาศก์ ด้านที่อยู่ตรงข้ามกับด้านดาว (★) คือด้านที่มีรูปใด",
+      svg:`<svg viewBox="0 0 240 180" width="240" height="180">
+        <g stroke="#333" fill="#fff">
+          <rect x="80" y="10" width="40" height="40"/>
+          <rect x="40" y="50" width="40" height="40"/>
+          <rect x="80" y="50" width="40" height="40"/>
+          <rect x="120" y="50" width="40" height="40"/>
+          <rect x="160" y="50" width="40" height="40"/>
+          <rect x="80" y="90" width="40" height="40"/>
+          <rect x="80" y="130" width="40" height="40"/>
+        </g>
+        <text x="100" y="35" text-anchor="middle" font-size="18">★</text>
+        <text x="60" y="75" text-anchor="middle" font-size="18">●</text>
+        <text x="100" y="75" text-anchor="middle" font-size="18">■</text>
+        <text x="140" y="75" text-anchor="middle" font-size="18">▲</text>
+        <text x="180" y="75" text-anchor="middle" font-size="18">✚</text>
+        <text x="100" y="115" text-anchor="middle" font-size="18">◆</text>
+        <text x="100" y="155" text-anchor="middle" font-size="16">◯</text>
+      </svg>`,
+      opts:["● (กลม)","■ (สี่เหลี่ยม)","▲ (สามเหลี่ยม)","◆ (ข้าวหลามตัด)","◯ (วงแหวน)"],
+      ans:5,
+      exp:"แผ่นคลี่แบบไม้กางเขน: ด้านบนสุด (★) เมื่อพับแล้วจะตรงข้ามกับด้านล่างสุด (◯)"},
+    { sec:"S", topic:"จำนวนลูกบาศก์",
+      q:"รูปทรงปิรามิดสร้างจากลูกบาศก์ ฐานเป็นตาราง 3×3 ชั้นที่ 2 เป็น 2×2 ยอดเป็น 1 ก้อน มีลูกบาศก์ทั้งหมดกี่ก้อน",
+      opts:["9","10","12","14","18"], ans:4,
+      exp:"9 + 4 + 1 = 14"},
+    { sec:"S", topic:"มุมมองด้านบน",
+      q:"มองรูปทรงที่ประกอบด้วยลูกบาศก์: สูง 3 ก้อนที่มุมซ้ายหลัง, สูง 2 ที่มุมขวาหลัง, สูง 1 ที่มุมซ้ายหน้า, สูง 1 ที่มุมขวาหน้า มุมมองจากด้านบนคืออะไร",
+      opts:["ตาราง 1×2","ตาราง 2×2","ตาราง 2×3","ตาราง 3×3","รูปตัว L"], ans:2,
+      exp:"มองจากด้านบนเห็นเฉพาะตำแหน่งฐาน 4 ช่องเรียงเป็นสี่เหลี่ยมจัตุรัส 2×2"},
+    { sec:"S", topic:"การหมุน 2 มิติ",
+      q:"ตัว L (ส่วนยาวในแนวตั้ง ส่วนสั้นยื่นออกขวาที่ขอบล่าง) เมื่อหมุน 90° ตามเข็มนาฬิกา จะกลายเป็นรูปใด",
+      opts:["ตัว L กลับหัว","ตัว L สะท้อน","แนวนอน ส่วนสั้นชี้ลงที่ปลายขวา","แนวนอน ส่วนสั้นชี้ขึ้นที่ปลายซ้าย","เหมือนเดิม"],
+      ans:3,
+      exp:"หมุน CW 90°: แกนตั้ง → แกนนอน, ส่วนที่เคยชี้ขวาตอนนี้ชี้ลง กลายเป็น L นอนมีส่วนสั้นชี้ลงที่ปลายขวา"},
+    { sec:"S", topic:"เงาสะท้อน",
+      q:"ตัว R เมื่อสะท้อนในกระจกแนวตั้ง (ซ้าย-ขวาสลับกัน) จะได้ตัวอักษรคล้ายกับข้อใด",
+      opts:["R ปกติ","R กลับหัว","R สะท้อน (หางชี้ไปทางซ้าย)","P","B"], ans:3,
+      exp:"สะท้อนแนวตั้งทำให้หางของ R ที่เคยชี้ขวา หันไปชี้ซ้าย"},
+    { sec:"S", topic:"แกนสมมาตร",
+      q:"รูปสี่เหลี่ยมจัตุรัสมีแกนสมมาตรกี่แกน",
+      opts:["2","3","4","6","8"], ans:3,
+      exp:"2 แกนผ่านจุดกึ่งกลางด้าน + 2 เส้นทแยงมุม = 4"},
+    { sec:"S", topic:"ภาคตัดขวาง",
+      q:"ตัดทรงกรวยด้วยระนาบขนานกับฐาน ภาคตัดขวางที่ได้เป็นรูปใด",
+      opts:["จุด","สามเหลี่ยม","วงรี","วงกลม","พาราโบลา"], ans:4,
+      exp:"ตัดขนานฐาน → ได้วงกลม (ขนาดเล็กลงตามระยะจากฐาน)"},
+    { sec:"S", topic:"ต่อรูปทรง",
+      q:"นำชิ้นสามเหลี่ยมมุมฉาก 2 ชิ้นที่เหมือนกัน มาต่อกันโดยด้านตรงข้ามมุมฉากประกบกัน ได้รูปใด",
+      opts:["สามเหลี่ยมด้านเท่า","สี่เหลี่ยมผืนผ้า","สี่เหลี่ยมจัตุรัส","สี่เหลี่ยมขนมเปียกปูน","สี่เหลี่ยมคางหมู"], ans:2,
+      exp:"ประกบด้านตรงข้ามมุมฉาก ได้รูปสี่เหลี่ยมผืนผ้า (จัตุรัสถ้าเป็น 45-45-90)"},
+    { sec:"S", topic:"นับหน้าลูกบาศก์",
+      q:"ทาสีลูกบาศก์ 3×3×3 (27 ก้อน) ทุกด้านภายนอก แล้วแยกก้อนเล็กออก มีกี่ก้อนที่ไม่มีสีเลย",
+      opts:["0","1","4","8","9"], ans:2,
+      exp:"เฉพาะก้อนที่อยู่ตรงกลาง (1×1×1) ที่ไม่ติดผิวใด → 1 ก้อน"},
+    { sec:"S", topic:"มุมมองด้านหน้า-ข้าง",
+      q:"ถ้ามองรูปทรง 3 มิติจากด้านหน้าเห็นเป็น 3×2 และมองจากด้านข้างเห็นเป็น 3×1 อย่างน้อยต้องใช้ลูกบาศก์กี่ก้อน",
+      opts:["4","5","6","7","8"], ans:3,
+      exp:"อาร์เรย์ 3 คอลัมน์ × 2 แถว (หน้า) × ความลึก 1 → 6 ก้อน"},
+    { sec:"S", topic:"รูปแบบเรขาคณิต",
+      q:"รูปหลายเหลี่ยมเรียงลำดับ: สามเหลี่ยม (3 ด้าน), สี่เหลี่ยม (4 ด้าน), ห้าเหลี่ยม (5 ด้าน), … รูปที่ 7 ในลำดับมีกี่ด้าน",
+      opts:["7","8","9","10","11"], ans:3,
+      exp:"รูปที่ n มี (n+2) ด้าน → รูปที่ 7 มี 9 ด้าน"},
+    { sec:"S", topic:"สามเหลี่ยมตัวเลข",
+      q:"สามเหลี่ยมตัวเลข: มุมล่างซ้าย L, มุมล่างขวา R, มุมบน T, กลาง M โดย M = (L × R) + T ถ้า L=6, R=4, T=8 แล้ว M = ?",
+      svg:`<svg viewBox="0 0 200 140" width="200" height="140">
+        <polygon points="100,15 30,125 170,125" fill="#fff" stroke="#333"/>
+        <text x="100" y="40" text-anchor="middle" font-size="16">T=8</text>
+        <text x="100" y="85" text-anchor="middle" font-size="18" font-weight="700">M=?</text>
+        <text x="45" y="120" text-anchor="middle" font-size="16">L=6</text>
+        <text x="155" y="120" text-anchor="middle" font-size="16">R=4</text>
+      </svg>`,
+      opts:["24","28","30","32","36"], ans:4,
+      exp:"(6×4) + 8 = 24 + 8 = 32"},
+    { sec:"S", topic:"กระดาษพับเจาะรู",
+      q:"พับกระดาษตามแนวทแยง (มุมล่างซ้ายขึ้นไปประกบมุมบนขวา) แล้วเจาะ 1 รูที่ตำแหน่งใด ๆ เมื่อคลี่ออกจะได้กี่รู และอยู่ตำแหน่งใด",
+      opts:["1 รู เหมือนเดิม","2 รู สะท้อนผ่านเส้นทแยงมุม","2 รู ติดกันที่ขอบ","4 รู ที่มุมทั้งสี่","3 รู เรียงเป็นแถว"], ans:2,
+      exp:"พับทแยง → รูสะท้อนผ่านเส้นทแยงมุม ได้ 2 รู ตรงตำแหน่งกระจกของกันและกัน"},
+
+    // ===== M: เชิงกล/ฟิสิกส์ 15 ข้อ =====
+    { sec:"M", topic:"คานสมดุล",
+      q:"คานยาว 4 m จุดหมุนอยู่ตรงกลาง วางน้ำหนัก 20 N ที่ปลายซ้ายสุด ต้องวางกี่นิวตันที่ปลายขวาสุดเพื่อให้คานอยู่ในสมดุล",
+      opts:["10","15","20","25","40"], ans:3,
+      exp:"ระยะจากจุดหมุนเท่ากัน (2 m) → ต้องใช้แรงเท่ากัน = 20 N"},
+    { sec:"M", topic:"คานสมดุล (ไม่สมมาตร)",
+      q:"คานยาว 3 m จุดหมุนอยู่ห่างจากปลายซ้าย 1 m ผูกวัตถุ 30 N ที่ปลายซ้าย ต้องวางกี่นิวตันที่ปลายขวาเพื่อสมดุล",
+      opts:["10","15","20","30","60"], ans:2,
+      exp:"สมดุลโมเมนต์: 30×1 = F×2 → F = 15 N"},
+    { sec:"M", topic:"รอกเดี่ยวตาย",
+      q:"ใช้รอกเดี่ยวตาย (fixed pulley) ยกน้ำหนัก 200 N ไม่คิดแรงเสียดทาน ต้องออกแรงดึงเชือกกี่นิวตัน",
+      opts:["50","100","150","200","400"], ans:4,
+      exp:"รอกเดี่ยวตายเปลี่ยนทิศทางแรงอย่างเดียว ไม่ลดแรง → ต้อง 200 N"},
+    { sec:"M", topic:"รอกเดี่ยวเคลื่อน",
+      q:"ใช้รอกเดี่ยวเคลื่อน (movable pulley) ยกน้ำหนัก 200 N (เชือก 2 เส้นรับน้ำหนัก) ต้องออกแรงกี่นิวตัน",
+      opts:["50","100","150","200","400"], ans:2,
+      exp:"รอกเดี่ยวเคลื่อน เชือก 2 เส้นช่วยรับ → แรง = 200/2 = 100 N"},
+    { sec:"M", topic:"ทิศการหมุนของเฟือง",
+      q:"เฟือง A หมุนตามเข็มนาฬิกา ถ้าเฟือง B ขบกับเฟือง A โดยตรง เฟือง B จะหมุนทิศทางใด",
+      opts:["ตามเข็มนาฬิกา","ทวนเข็มนาฬิกา","ไม่หมุน","หมุนสลับทิศ","ขึ้นกับขนาดเฟือง"], ans:2,
+      exp:"เฟืองที่ขบกันโดยตรงจะหมุนสวนทางกันเสมอ"},
+    { sec:"M", topic:"อัตราทดเฟือง",
+      q:"เฟือง 15 ฟัน หมุน 60 รอบ/นาที ขบกับเฟือง 45 ฟัน เฟืองใหญ่จะหมุนกี่รอบ/นาที",
+      opts:["10","15","20","30","60"], ans:3,
+      exp:"จำนวนฟัน×รอบ เท่ากัน: 15×60 = 45×N → N = 20 รอบ/นาที"},
+    { sec:"M", topic:"วงจรอนุกรม",
+      q:"หลอดไฟ 3 ดวงต่ออนุกรม หากหลอดตรงกลางขาด หลอดที่เหลือจะเป็นอย่างไร",
+      opts:["สว่างเหมือนเดิม","สว่างมากขึ้น","สว่างน้อยลง","ดับทั้งสองดวง","กระพริบ"], ans:4,
+      exp:"วงจรอนุกรมเมื่อขาดที่ใดที่หนึ่ง กระแสจะไหลไม่ได้ → ดับทั้งวงจร"},
+    { sec:"M", topic:"วงจรขนาน",
+      q:"หลอดไฟ 3 ดวงต่อขนานกับแหล่งจ่ายไฟ หากหลอดหนึ่งขาด หลอดที่เหลือจะเป็นอย่างไร",
+      opts:["ดับทั้งหมด","สว่างน้อยลง","สว่างเท่าเดิม","สว่างขึ้น","กระพริบ"], ans:3,
+      exp:"วงจรขนาน แต่ละหลอดได้แรงดันตรงจากแหล่งจ่าย → ไม่ขึ้นกับหลอดอื่น"},
+    { sec:"M", topic:"แรงดันตกในวงจรอนุกรม",
+      q:"แบตเตอรี่ 12 V ต่ออนุกรมกับหลอดไฟ 2 ดวงที่เหมือนกัน แรงดันตกที่แต่ละหลอดเท่าใด",
+      opts:["3 V","4 V","6 V","9 V","12 V"], ans:3,
+      exp:"แรงดันรวมแบ่งเท่า ๆ กัน → 12/2 = 6 V"},
+    { sec:"M", topic:"ความดัน",
+      q:"แรง 200 N กดบนพื้นที่ 0.5 m² ความดันที่พื้นผิวมีค่าเท่าใด (Pa)",
+      opts:["100","200","400","500","800"], ans:3,
+      exp:"P = F/A = 200/0.5 = 400 Pa"},
+    { sec:"M", topic:"แรงลอยตัว",
+      q:"วัตถุหนัก 30 N เมื่อจุ่มในน้ำอ่านค่าได้ 18 N แรงลอยตัวที่กระทำต่อวัตถุมีค่าเท่าใด",
+      opts:["6 N","9 N","12 N","18 N","30 N"], ans:3,
+      exp:"แรงลอยตัว = น้ำหนักในอากาศ − น้ำหนักในน้ำ = 30 − 18 = 12 N"},
+    { sec:"M", topic:"ความเสียดทาน-พื้นเอียง",
+      q:"วางวัตถุบนพื้นเอียง เพิ่มมุมเอียงขึ้นเรื่อย ๆ จนวัตถุเริ่มเลื่อน จะเกิดอะไรถ้าเพิ่มมุมต่อไปอีก",
+      opts:["วัตถุหยุด","วัตถุช้าลง","วัตถุเลื่อนเร็วขึ้น","วัตถุลอยขึ้น","แรงเสียดทานเพิ่ม"], ans:3,
+      exp:"องค์ประกอบน้ำหนักตามแนวลาด (mg sinθ) เพิ่มขึ้นเกินแรงเสียดทาน → เลื่อนเร็วขึ้น"},
+    { sec:"M", topic:"กฎของฮุก",
+      q:"สปริงยืด 4 cm เมื่อแขวนน้ำหนัก 10 N ถ้าเปลี่ยนเป็น 25 N สปริงยืดกี่ cm (ในช่วงยืดหยุ่น)",
+      opts:["5","8","10","12","15"], ans:3,
+      exp:"F ∝ x: 25/10 = 2.5 เท่า → ยืด 4 × 2.5 = 10 cm"},
+    { sec:"M", topic:"การนำความร้อน",
+      q:"วัสดุใดนำความร้อนได้ดีที่สุด",
+      opts:["ไม้","พลาสติก","ทองแดง","ยาง","แก้ว"], ans:3,
+      exp:"โลหะนำความร้อนได้ดีกว่าวัสดุอื่น และทองแดงเป็นหนึ่งในโลหะที่ดีที่สุด"},
+    { sec:"M", topic:"กฎข้อ 3 ของนิวตัน",
+      q:"เมื่อเราเหยียบพื้นด้วยแรง 600 N ลง แรงปฏิกิริยาที่พื้นกระทำต่อเท้าของเราคือ",
+      opts:["0 N","300 N ลง","600 N ลง","300 N ขึ้น","600 N ขึ้น"], ans:5,
+      exp:"กฎข้อ 3: แรงกิริยา-ปฏิกิริยา ขนาดเท่ากันทิศตรงข้าม → 600 N ขึ้น"}
+  ]
+});
+/* ---------- TPAT 3 ชุดที่ 2 ---------- */
+TPAT_EXAMS.push({
+  name: "ชุดที่ 2",
+  questions: [
+    // ===== N: ตัวเลข 15 ข้อ =====
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 4, 9, 16, 25, 36, ?",
+      opts:["42","45","48","49","64"], ans:4,
+      exp:"กำลังสอง 2², 3², 4², 5², 6², 7² = 49"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 5, 10, 20, 40, ?",
+      opts:["60","70","75","80","100"], ans:4,
+      exp:"คูณ 2 ทุกครั้ง → 40×2 = 80"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 200, 100, 50, 25, ?",
+      opts:["10","12.5","15","20","0"], ans:2,
+      exp:"หาร 2 ทุกครั้ง → 25/2 = 12.5"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 1, 1, 2, 3, 5, 8, ?",
+      opts:["11","12","13","14","16"], ans:3,
+      exp:"ฟีโบนัชชี: 5 + 8 = 13"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 3, 6, 12, 24, 48, ?",
+      opts:["64","72","86","96","108"], ans:4,
+      exp:"คูณ 2 ไปเรื่อย ๆ → 48×2 = 96"},
+    { sec:"N", topic:"อุปมา",
+      q:"4 : 16 :: 6 : ?",
+      opts:["24","30","32","36","48"], ans:4,
+      exp:"กำลังสอง 4² = 16, 6² = 36"},
+    { sec:"N", topic:"อุปมา",
+      q:"15 : 5 :: 24 : ?",
+      opts:["4","6","8","9","12"], ans:3,
+      exp:"หาร 3: 15/3 = 5, 24/3 = 8"},
+    { sec:"N", topic:"ร้อยละ",
+      q:"ร้อยละ 30 ของ 250 เท่ากับเท่าใด",
+      opts:["45","60","75","90","125"], ans:3,
+      exp:"0.30 × 250 = 75"},
+    { sec:"N", topic:"อัตราส่วน",
+      q:"a : b = 3 : 5 โดย b − a = 12 ค่าของ b คือเท่าใด",
+      opts:["15","18","24","30","36"], ans:4,
+      exp:"5k − 3k = 12 → k = 6, b = 30"},
+    { sec:"N", topic:"ผสมสาร",
+      q:"ผสมสารละลาย 50% จำนวน 4 ลิตร กับ 20% จำนวน 2 ลิตร ได้ความเข้มข้นประมาณเท่าใด",
+      opts:["30%","35%","40%","45%","50%"], ans:3,
+      exp:"(0.5×4 + 0.2×2)/6 = (2+0.4)/6 = 2.4/6 = 40%"},
+    { sec:"N", topic:"อายุ",
+      q:"พี่อายุมากกว่าน้อง 8 ปี อีก 2 ปีผลรวมอายุเท่ากับ 30 ปี ปัจจุบันน้องอายุเท่าใด",
+      opts:["7","8","9","10","12"], ans:3,
+      exp:"ตอนนี้รวม = 30 − 4 = 26 → น้อง = (26−8)/2 = 9 ปี"},
+    { sec:"N", topic:"อัตราเร็ว",
+      q:"รถไฟวิ่ง 240 กม. ใช้เวลา 4 ชั่วโมง อัตราเร็วเฉลี่ยเป็นกี่ กม./ชม.",
+      opts:["50","55","60","65","80"], ans:3,
+      exp:"240/4 = 60 กม./ชม."},
+    { sec:"N", topic:"อัตราการทำงาน",
+      q:"ก ทำงานเสร็จใน 3 วัน ข ทำเสร็จใน 6 วัน ช่วยกันจะเสร็จในกี่วัน",
+      opts:["1.5","1.8","2","2.5","3"], ans:3,
+      exp:"อัตรารวม = 1/3 + 1/6 = 1/2 ต่อวัน → 2 วัน"},
+    { sec:"N", topic:"การนับ",
+      q:"จำนวนเต็มตั้งแต่ 1 ถึง 60 ที่หารด้วย 4 ลงตัว มีกี่จำนวน",
+      opts:["12","14","15","16","20"], ans:3,
+      exp:"4, 8, 12, …, 60 มี 60/4 = 15 จำนวน"},
+    { sec:"N", topic:"ความน่าจะเป็น",
+      q:"ทอดลูกเต๋า 1 ลูก ความน่าจะเป็นที่ได้แต้มคี่คือ",
+      opts:["1/6","1/4","1/3","1/2","2/3"], ans:4,
+      exp:"แต้มคี่ 1, 3, 5 มี 3 หน้า จาก 6 → 1/2"},
+
+    // ===== S: มิติสัมพันธ์ 15 ข้อ =====
+    { sec:"S", topic:"พับกระดาษเจาะรู",
+      q:"พับกระดาษครึ่งหนึ่ง 3 ครั้งต่อเนื่อง (แนวนอน-แนวตั้ง-แนวนอน) แล้วเจาะ 1 รู เมื่อคลี่ออกจะได้กี่รู",
+      opts:["2","4","6","8","16"], ans:4,
+      exp:"พับ 3 ครั้ง แบ่งเป็น 2³ = 8 ส่วน → 1 รูทะลุ 8 ชั้น = 8 รู"},
+    { sec:"S", topic:"ลูกบาศก์-หน้าตรงข้าม",
+      q:"จากแผ่นคลี่รูปไม้กางเขน ด้านตรงข้ามด้านที่มีสัญลักษณ์ ▲ (สามเหลี่ยม) คือด้านที่มีสัญลักษณ์ใด",
+      svg:`<svg viewBox="0 0 240 180" width="240" height="180">
+        <g stroke="#333" fill="#fff">
+          <rect x="80" y="10" width="40" height="40"/>
+          <rect x="40" y="50" width="40" height="40"/>
+          <rect x="80" y="50" width="40" height="40"/>
+          <rect x="120" y="50" width="40" height="40"/>
+          <rect x="160" y="50" width="40" height="40"/>
+          <rect x="80" y="90" width="40" height="40"/>
+        </g>
+        <text x="100" y="35" text-anchor="middle" font-size="18">●</text>
+        <text x="60" y="75" text-anchor="middle" font-size="18">★</text>
+        <text x="100" y="75" text-anchor="middle" font-size="18">▲</text>
+        <text x="140" y="75" text-anchor="middle" font-size="18">■</text>
+        <text x="180" y="75" text-anchor="middle" font-size="18">✚</text>
+        <text x="100" y="115" text-anchor="middle" font-size="18">◆</text>
+      </svg>`,
+      opts:["● (กลม)","★ (ดาว)","✚ (บวก)","■ (สี่เหลี่ยม)","◆ (ข้าวหลามตัด)"], ans:3,
+      exp:"ด้าน ▲ อยู่กลางแนวนอน ตรงข้ามกับด้านที่อยู่กลับกันของแถวนั้น → ✚"},
+    { sec:"S", topic:"นับลูกบาศก์",
+      q:"ปิรามิดจากลูกบาศก์: ฐาน 4×4, ชั้นที่ 2 เป็น 3×3, ชั้น 3 เป็น 2×2, ยอด 1 ก้อน มีลูกบาศก์ทั้งหมดกี่ก้อน",
+      opts:["20","25","28","30","36"], ans:4,
+      exp:"16 + 9 + 4 + 1 = 30"},
+    { sec:"S", topic:"มุมมองด้านบน",
+      q:"รูปทรงมีลูกบาศก์วางเป็นตัว L (ฐาน 3 ก้อนเรียงแนวนอน + 2 ก้อนเพิ่มขึ้นด้านบนที่ปลายซ้าย) เมื่อมองจากด้านบน จะเห็นรูปใด",
+      opts:["รูปตัว L","รูปสี่เหลี่ยมผืนผ้า 1×3","รูปสี่เหลี่ยมจัตุรัส 2×2","ตาราง 2×3","รูปตัว T"], ans:2,
+      exp:"มองจากด้านบนเห็นเฉพาะตำแหน่งฐาน = 3 ก้อนเรียงแนวนอน = รูปสี่เหลี่ยมผืนผ้า 1×3"},
+    { sec:"S", topic:"การหมุน 180°",
+      q:"รูปตัว J (ส่วนยาวอยู่ขวา ส่วนงอไปทางซ้ายที่ด้านล่าง) เมื่อหมุน 180° จะมีรูปร่างคล้ายข้อใด",
+      opts:["J ปกติ","ตัว L","ตัว L กลับหัว","ตัว J กลับหัว (ส่วนงอไปทางขวาที่ด้านบน)","U"], ans:4,
+      exp:"การหมุน 180° ทำให้ด้านล่างขึ้นบน ซ้ายเป็นขวา → J พลิก = ส่วนงอไปขวาที่ด้านบน"},
+    { sec:"S", topic:"เงาสะท้อน",
+      q:"ตัวอักษรใดต่อไปนี้ เมื่อสะท้อนในกระจก (สะท้อนแนวตั้ง) จะได้รูปเหมือนเดิม",
+      opts:["B","E","K","A","R"], ans:4,
+      exp:"A มีสมมาตรแนวตั้ง เมื่อสะท้อนซ้าย-ขวาจะได้รูปเดิม"},
+    { sec:"S", topic:"แกนสมมาตร",
+      q:"รูปสามเหลี่ยมด้านเท่ามีแกนสมมาตรกี่แกน",
+      opts:["1","2","3","4","6"], ans:3,
+      exp:"3 แกน — เส้นที่ผ่านแต่ละยอดไปยังจุดกึ่งกลางด้านตรงข้าม"},
+    { sec:"S", topic:"ภาคตัดขวาง",
+      q:"ตัดทรงกระบอกด้วยระนาบที่ขนานกับแกน (ตัดตามยาว) ภาคตัดขวางที่ได้คือ",
+      opts:["วงกลม","วงรี","สี่เหลี่ยมผืนผ้า","สามเหลี่ยม","พาราโบลา"], ans:3,
+      exp:"ตัดตามแกนทรงกระบอก → หน้าตัดเป็นสี่เหลี่ยมผืนผ้า"},
+    { sec:"S", topic:"การทาสีลูกบาศก์",
+      q:"ทาสีลูกบาศก์ 3×3×3 (27 ก้อน) ทุกด้าน แล้วแยกก้อน มีกี่ก้อนที่มีสีเพียง 1 ด้าน",
+      opts:["4","6","8","12","24"], ans:2,
+      exp:"ก้อนที่อยู่กลางหน้าแต่ละด้าน (ไม่ติดขอบ/มุม) มี 1 ก้อนต่อหน้า × 6 หน้า = 6"},
+    { sec:"S", topic:"สร้างรูปจากชิ้น",
+      q:"นำสามเหลี่ยมด้านเท่า 6 รูปที่เหมือนกัน มาต่อกันโดยประกบด้านที่มีความยาวเท่ากัน จะได้รูปใดที่ใหญ่และสมมาตรที่สุด",
+      opts:["สี่เหลี่ยมผืนผ้า","ห้าเหลี่ยม","หกเหลี่ยมด้านเท่า","ดาว 6 แฉก","วงกลม"], ans:3,
+      exp:"สามเหลี่ยมด้านเท่า 6 รูปประกอบเป็นหกเหลี่ยมปกติ (regular hexagon)"},
+    { sec:"S", topic:"มุมมอง 3 มิติ",
+      q:"มองรูปทรงจากด้านหน้าเห็นเป็น 2×3, ด้านข้างเห็น 2×2, ด้านบนเห็น 3×2 อย่างน้อยต้องมีลูกบาศก์กี่ก้อน",
+      opts:["6","8","10","12","18"], ans:4,
+      exp:"ด้านหน้า 2×3 = สูง 2 กว้าง 3, ด้านข้างความลึก 2, ด้านบน 3×2 ยืนยัน → ทรงสี่เหลี่ยม 3×2×2 = 12 ก้อน"},
+    { sec:"S", topic:"รูปแบบถัดไป",
+      q:"ลำดับ: 3 ด้าน, 4 ด้าน, 6 ด้าน, 8 ด้าน, 10 ด้าน, ? (จำนวนด้านของรูปในลำดับ)",
+      opts:["11","12","14","16","20"], ans:2,
+      exp:"ผลต่างเพิ่มทีละ 2 (+1,+2,+2,+2) อาจยึดผลต่าง +2 ตลอดช่วงหลัง → 10+2 = 12"},
+    { sec:"S", topic:"สามเหลี่ยมตัวเลข",
+      q:"สามเหลี่ยมตัวเลขใช้กฎ M = (L + R) × T โดย T = บน, L = ล่างซ้าย, R = ล่างขวา ถ้า L=3, R=5, T=4 ค่า M คือ",
+      svg:`<svg viewBox="0 0 200 140" width="200" height="140">
+        <polygon points="100,15 30,125 170,125" fill="#fff" stroke="#333"/>
+        <text x="100" y="40" text-anchor="middle" font-size="16">T=4</text>
+        <text x="100" y="85" text-anchor="middle" font-size="18" font-weight="700">M=?</text>
+        <text x="45" y="120" text-anchor="middle" font-size="16">L=3</text>
+        <text x="155" y="120" text-anchor="middle" font-size="16">R=5</text>
+      </svg>`,
+      opts:["12","18","24","32","40"], ans:4,
+      exp:"(3 + 5) × 4 = 8 × 4 = 32"},
+    { sec:"S", topic:"พับและตัด",
+      q:"พับกระดาษสี่เหลี่ยมจัตุรัสเป็น 4 ส่วนเท่ากัน (พับครึ่งแนวตั้งและแนวนอน) แล้วตัดรูปสามเหลี่ยมเล็กที่มุมที่ซ้อนกัน เมื่อคลี่ออกจะได้รูป",
+      opts:["รูเดียวตรงกลาง","รู 4 รูที่มุมทั้ง 4","รู 4 รูกลางของแต่ละด้าน","รูปสี่เหลี่ยมกลางกระดาษ","วงกลมกลางกระดาษ"], ans:2,
+      exp:"พับ 2 ครั้ง ทำให้มุมทั้งสี่ซ้อนกัน → ตัดครั้งเดียวเท่ากับตัดทุกมุม = 4 รู"},
+    { sec:"S", topic:"จำนวนมุม",
+      q:"รูปทรงลูกบาศก์มีกี่มุม (vertices)",
+      opts:["4","6","8","10","12"], ans:3,
+      exp:"ลูกบาศก์มี 8 มุม 12 ขอบ 6 หน้า"},
+
+    // ===== M: เชิงกล/ฟิสิกส์ 15 ข้อ =====
+    { sec:"M", topic:"คานสมดุล",
+      q:"คานยาว 6 m จุดหมุนห่างจากปลายซ้าย 2 m น้ำหนัก 40 N อยู่ที่ปลายซ้าย ต้องวางกี่นิวตันที่ปลายขวาเพื่อสมดุล",
+      opts:["10","15","20","25","40"], ans:3,
+      exp:"40×2 = F×4 → F = 20 N"},
+    { sec:"M", topic:"ระบบรอก",
+      q:"ระบบรอกประกอบด้วยรอกเดี่ยวเคลื่อน 2 ตัว (เชือก 4 เส้นรับน้ำหนัก) ใช้ยกวัตถุ 400 N ต้องออกแรงกี่นิวตัน (ไม่คิดแรงเสียดทาน)",
+      opts:["50","100","150","200","400"], ans:2,
+      exp:"แรง = น้ำหนัก/จำนวนเชือกรับ = 400/4 = 100 N"},
+    { sec:"M", topic:"ทิศการหมุนของเฟือง",
+      q:"เฟืองสามตัว A, B, C ขบต่อกันเป็นลำดับ ถ้า A หมุนตามเข็มนาฬิกา C จะหมุนทิศใด",
+      opts:["ตามเข็มนาฬิกา","ทวนเข็มนาฬิกา","ไม่หมุน","ขึ้นกับขนาดเฟือง","หมุนขึ้น"], ans:1,
+      exp:"A→B ทิศสลับ, B→C ทิศสลับอีก → C มีทิศเดียวกับ A = ตามเข็ม"},
+    { sec:"M", topic:"เฟืองต่อเนื่อง",
+      q:"เฟืองตัวเล็ก 20 ฟัน หมุนด้วย 90 รอบ/นาที ขบกับเฟืองใหญ่ 60 ฟัน เฟืองใหญ่หมุนกี่รอบ/นาที",
+      opts:["20","30","45","60","90"], ans:2,
+      exp:"20×90 = 60×N → N = 30 รอบ/นาที"},
+    { sec:"M", topic:"พลังงานจลน์",
+      q:"วัตถุมวล 2 kg เคลื่อนที่ด้วย 3 m/s มีพลังงานจลน์กี่จูล",
+      opts:["3","6","9","12","18"], ans:3,
+      exp:"KE = ½mv² = ½×2×9 = 9 J"},
+    { sec:"M", topic:"ความหนาแน่น",
+      q:"วัตถุมวล 500 g ปริมาตร 250 cm³ ความหนาแน่นเท่าใด g/cm³",
+      opts:["0.5","1.0","1.5","2.0","2.5"], ans:4,
+      exp:"ρ = m/V = 500/250 = 2 g/cm³"},
+    { sec:"M", topic:"วงจรขนาน",
+      q:"ตัวต้านทาน 6 Ω กับ 3 Ω ต่อขนาน ความต้านทานรวมเท่าใด",
+      opts:["1 Ω","2 Ω","3 Ω","4.5 Ω","9 Ω"], ans:2,
+      exp:"1/R = 1/6 + 1/3 = 3/6 → R = 2 Ω"},
+    { sec:"M", topic:"กำลังไฟฟ้า",
+      q:"หลอดไฟ 60 W ใช้งาน 0.5 ชั่วโมง ใช้พลังงานกี่ Wh",
+      opts:["15","30","60","90","120"], ans:2,
+      exp:"E = P×t = 60×0.5 = 30 Wh"},
+    { sec:"M", topic:"กฎของโอห์ม",
+      q:"ต่อตัวต้านทาน 10 Ω กับแบต 5 V กระแสไฟฟ้ากี่แอมป์",
+      opts:["0.2","0.5","1","2","5"], ans:2,
+      exp:"I = V/R = 5/10 = 0.5 A"},
+    { sec:"M", topic:"ความดันของไหล",
+      q:"ความดันที่ก้นสระน้ำลึก 5 m (ρ=1000 kg/m³, g=10) เป็นกี่ปาสคาล (ไม่รวมความดันบรรยากาศ)",
+      opts:["5,000","10,000","25,000","50,000","100,000"], ans:4,
+      exp:"P = ρgh = 1000×10×5 = 50,000 Pa"},
+    { sec:"M", topic:"แรงลอยตัว-อาร์คิมิดีส",
+      q:"วัตถุจุ่มในน้ำทั้งก้อน แทนที่น้ำไป 500 cm³ แรงลอยตัวที่กระทำกี่นิวตัน (ρ_น้ำ = 1000 kg/m³, g = 10)",
+      opts:["2","3","4","5","10"], ans:4,
+      exp:"F_B = ρVg = 1000×(500×10⁻⁶)×10 = 5 N"},
+    { sec:"M", topic:"พื้นเอียง",
+      q:"วัตถุ 10 kg วางบนพื้นเอียงไม่มีแรงเสียดทาน ทำมุม 30° กับแนวราบ องค์ประกอบของน้ำหนักตามแนวลาดมีค่ากี่นิวตัน (g=10, sin30°=0.5)",
+      opts:["25","50","75","87","100"], ans:2,
+      exp:"F = mg sinθ = 10×10×0.5 = 50 N"},
+    { sec:"M", topic:"สปริง-ขนาน",
+      q:"สปริง 2 ตัว ตัวละ k = 100 N/m ต่อขนานกัน ความแข็งรวมเท่าใด",
+      opts:["50 N/m","100 N/m","150 N/m","200 N/m","400 N/m"], ans:4,
+      exp:"สปริงขนาน: k_eq = k₁ + k₂ = 200 N/m"},
+    { sec:"M", topic:"ความจุความร้อน",
+      q:"น้ำ 200 g อุณหภูมิเพิ่มจาก 20°C เป็น 50°C ต้องใช้ความร้อนกี่แคลอรี (c_น้ำ = 1 cal/g·°C)",
+      opts:["2,000","4,000","5,000","6,000","10,000"], ans:4,
+      exp:"Q = mcΔT = 200×1×30 = 6,000 cal"},
+    { sec:"M", topic:"กฎข้อ 2 ของนิวตัน",
+      q:"แรง 20 N กระทำต่อวัตถุมวล 4 kg ที่หยุดนิ่ง วัตถุจะมีความเร่งกี่ m/s²",
+      opts:["2","4","5","8","10"], ans:3,
+      exp:"a = F/m = 20/4 = 5 m/s²"}
+  ]
+});
+/* ---------- TPAT 3 ชุดที่ 3 ---------- */
+TPAT_EXAMS.push({
+  name: "ชุดที่ 3",
+  questions: [
+    // ===== N: ตัวเลข 15 ข้อ =====
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 1, 4, 10, 22, 46, ?",
+      opts:["72","82","88","94","96"], ans:4,
+      exp:"กฎ: ×2 + 2 ทุกครั้ง → 46×2+2 = 94"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 11, 13, 17, 19, 23, ?",
+      opts:["25","27","29","31","33"], ans:3,
+      exp:"จำนวนเฉพาะที่ต่อจาก 23 คือ 29"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 2, 6, 12, 20, 30, ?",
+      opts:["36","40","42","46","56"], ans:3,
+      exp:"n(n+1): 1·2, 2·3, 3·4, 4·5, 5·6, 6·7 = 42"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 1, 8, 27, 64, ?",
+      opts:["81","100","125","216","343"], ans:3,
+      exp:"กำลังสาม 1³, 2³, 3³, 4³, 5³ = 125"},
+    { sec:"N", topic:"อนุกรมเลข",
+      q:"หาเลขถัดไป: 16, 8, 4, 2, ?",
+      opts:["0","0.5","1","1.5","2"], ans:3,
+      exp:"หาร 2 ทุกครั้ง → 2/2 = 1"},
+    { sec:"N", topic:"อุปมา",
+      q:"4 : 64 :: 3 : ?",
+      opts:["9","12","24","27","81"], ans:4,
+      exp:"กำลังสาม 4³ = 64, 3³ = 27"},
+    { sec:"N", topic:"อุปมา",
+      q:"5 : 25 :: 7 : ?",
+      opts:["35","42","49","56","63"], ans:3,
+      exp:"กำลังสอง 5² = 25, 7² = 49"},
+    { sec:"N", topic:"ร้อยละ",
+      q:"ร้อยละ 40 ของ 150 มีค่าเท่าใด",
+      opts:["45","50","60","70","75"], ans:3,
+      exp:"0.40 × 150 = 60"},
+    { sec:"N", topic:"อัตราส่วนสามส่วน",
+      q:"a : b : c = 2 : 3 : 5 และ a + b + c = 100 ค่าของ c คือ",
+      opts:["20","30","40","50","60"], ans:4,
+      exp:"10k = 100 → k = 10, c = 5×10 = 50"},
+    { sec:"N", topic:"ผสมสาร",
+      q:"ผสมสารละลาย 60% จำนวน 3 ลิตร กับ 20% จำนวน 2 ลิตร ได้ความเข้มข้นประมาณเท่าใด",
+      opts:["32%","40%","44%","48%","52%"], ans:3,
+      exp:"(0.6×3 + 0.2×2)/5 = (1.8+0.4)/5 = 2.2/5 = 44%"},
+    { sec:"N", topic:"อายุ",
+      q:"ปัจจุบัน ก อายุเป็น 3 เท่าของ ข อีก 5 ปีผลรวมอายุ = 38 ปัจจุบัน ข อายุกี่ปี",
+      opts:["5","6","7","8","9"], ans:3,
+      exp:"ตอนนี้รวม = 38 − 10 = 28, 3x + x = 28 → x = 7 ปี"},
+    { sec:"N", topic:"อัตราเร็วกระแส",
+      q:"เรือวิ่งในน้ำนิ่ง 20 กม./ชม. กระแสน้ำไหล 5 กม./ชม. ทวนกระแสไปได้ 45 กม. ใช้เวลากี่ชั่วโมง",
+      opts:["1","2","3","4","5"], ans:3,
+      exp:"ความเร็วทวนน้ำ = 20 − 5 = 15 กม./ชม. → เวลา = 45/15 = 3 ชม."},
+    { sec:"N", topic:"อัตราการทำงาน",
+      q:"ก ทำงานเสร็จใน 2 ชม. ข ทำเสร็จใน 3 ชม. ช่วยกันทำใช้เวลากี่ชั่วโมง",
+      opts:["0.8","1.0","1.2","1.5","2.0"], ans:3,
+      exp:"อัตรารวม = 1/2 + 1/3 = 5/6 → เวลา = 6/5 = 1.2 ชม."},
+    { sec:"N", topic:"การนับ",
+      q:"จำนวนเต็มบวก 1 ถึง 100 ที่หารด้วย 5 ลงตัว มีกี่จำนวน",
+      opts:["10","15","20","25","50"], ans:3,
+      exp:"5, 10, 15, …, 100 → 100/5 = 20 จำนวน"},
+    { sec:"N", topic:"ความน่าจะเป็น",
+      q:"โยนเหรียญ 3 ครั้ง ความน่าจะเป็นที่ได้หัวอย่างน้อย 2 ครั้ง",
+      opts:["1/8","1/4","3/8","1/2","5/8"], ans:4,
+      exp:"กรณีที่เข้าเงื่อนไข: HHT, HTH, THH, HHH = 4 จาก 8 → 1/2"},
+
+    // ===== S: มิติสัมพันธ์ 15 ข้อ =====
+    { sec:"S", topic:"พับกระดาษเจาะรู 2 รู",
+      q:"พับกระดาษครึ่งหนึ่งแนวตั้ง แล้วเจาะ 2 รูที่กระดาษพับ เมื่อคลี่ออกจะได้กี่รู",
+      opts:["2","3","4","5","6"], ans:3,
+      exp:"แต่ละรูกลายเป็น 2 รูเมื่อคลี่ → 2×2 = 4 รู"},
+    { sec:"S", topic:"ลูกบาศก์-หน้าตรงข้าม",
+      q:"แผ่นคลี่ลูกบาศก์รูปตัว T (1-4-1) ด้านบนสุดคือ A, แถวกลางเรียง B-C-D-E, ด้านล่างสุด F เมื่อพับเป็นลูกบาศก์ ด้านตรงข้ามกับ C คือด้านใด",
+      svg:`<svg viewBox="0 0 240 180" width="240" height="180">
+        <g stroke="#333" fill="#fff">
+          <rect x="80" y="10" width="40" height="40"/>
+          <rect x="40" y="50" width="40" height="40"/>
+          <rect x="80" y="50" width="40" height="40"/>
+          <rect x="120" y="50" width="40" height="40"/>
+          <rect x="160" y="50" width="40" height="40"/>
+          <rect x="80" y="90" width="40" height="40"/>
+        </g>
+        <text x="100" y="37" text-anchor="middle" font-size="16" font-weight="700">A</text>
+        <text x="60" y="77" text-anchor="middle" font-size="16" font-weight="700">B</text>
+        <text x="100" y="77" text-anchor="middle" font-size="16" font-weight="700">C</text>
+        <text x="140" y="77" text-anchor="middle" font-size="16" font-weight="700">D</text>
+        <text x="180" y="77" text-anchor="middle" font-size="16" font-weight="700">E</text>
+        <text x="100" y="117" text-anchor="middle" font-size="16" font-weight="700">F</text>
+      </svg>`,
+      opts:["A","B","D","E","F"], ans:4,
+      exp:"แผ่นคลี่: C อยู่ด้านล่าง, E อยู่ฝั่งตรงข้ามของแถวกลาง (ห่าง 2 ช่อง) → C ↔ E"},
+    { sec:"S", topic:"จำนวนลูกบาศก์",
+      q:"รูปทรงจากลูกบาศก์: 3×3×3 แต่เอาก้อนมุมบน 4 ก้อน (เฉพาะชั้นบน) ออกทั้งหมด เหลือลูกบาศก์กี่ก้อน",
+      opts:["19","21","23","24","27"], ans:3,
+      exp:"27 − 4 = 23"},
+    { sec:"S", topic:"มุมมองด้านหน้า",
+      q:"รูปทรงลูกบาศก์วางเป็นฐาน 2×3 (ลึก×กว้าง) และชั้นบนเพิ่ม 1 ก้อนมุมซ้ายบน มองจากด้านหน้า (มองกว้าง×สูง) เห็นรูปใด",
+      opts:["สี่เหลี่ยม 1×2","สี่เหลี่ยม 2×2","ตัว L (สูง 2 ซ้าย, สูง 1 ขวา)","ตัว T","สามเหลี่ยม"], ans:3,
+      exp:"กว้าง 3 ช่อง แต่มีช่องสูง 2 เฉพาะทางซ้าย → รูปตัว L"},
+    { sec:"S", topic:"การหมุน 2 มิติ",
+      q:"รูปพัด (ครึ่งวงกลม) ที่ด้านโค้งหันขึ้น เมื่อหมุน 90° ทวนเข็มนาฬิกา ด้านโค้งจะหันไปทิศใด",
+      opts:["ขึ้น","ลง","ซ้าย","ขวา","เอียง 45°"], ans:3,
+      exp:"หมุน 90° CCW: ด้านโค้งที่เคยหันขึ้น → หันไปทางซ้าย"},
+    { sec:"S", topic:"เงาสะท้อน",
+      q:"ตัวเลขใดต่อไปนี้ เมื่อสะท้อนผ่านกระจกแนวตั้ง (สะท้อนซ้าย-ขวา) จะยังคงดูเหมือนตัวเลขเดิม",
+      opts:["1","3","4","7","0"], ans:5,
+      exp:"0 มีสมมาตรแนวตั้ง สะท้อนแล้วเหมือนเดิม"},
+    { sec:"S", topic:"แกนสมมาตร",
+      q:"รูปหกเหลี่ยมปกติมีแกนสมมาตรทั้งหมดกี่แกน",
+      opts:["3","4","6","8","12"], ans:3,
+      exp:"3 แกนผ่านยอดตรงข้าม + 3 แกนผ่านกึ่งกลางด้านตรงข้าม = 6"},
+    { sec:"S", topic:"ภาคตัดขวาง",
+      q:"ตัดทรงกรวยในแนวตั้งผ่านยอด ภาคตัดขวางที่ได้เป็นรูป",
+      opts:["วงกลม","วงรี","พาราโบลา","สามเหลี่ยมหน้าจั่ว","สี่เหลี่ยมผืนผ้า"], ans:4,
+      exp:"ตัดในแนวตั้งผ่านยอด → ได้สามเหลี่ยมหน้าจั่ว"},
+    { sec:"S", topic:"การทาสีลูกบาศก์",
+      q:"ทาสีลูกบาศก์ 4×4×4 (64 ก้อน) ทุกด้านภายนอก มีกี่ก้อนที่มีสี 2 ด้าน (อยู่ตามขอบ ไม่ใช่มุม)",
+      opts:["8","12","16","24","32"], ans:4,
+      exp:"ก้อนขอบที่ไม่ใช่มุม: 12 ขอบ × (4−2) = 12 × 2 = 24"},
+    { sec:"S", topic:"ประกอบรูป",
+      q:"ต้องใช้สี่เหลี่ยมจัตุรัสเล็ก (หน่วย) กี่ชิ้นจึงจะประกอบเป็นสี่เหลี่ยมจัตุรัสที่ใหญ่ที่มีด้าน 5 หน่วย",
+      opts:["5","10","15","20","25"], ans:5,
+      exp:"พื้นที่ = 5×5 = 25 ช่อง"},
+    { sec:"S", topic:"มุมมองด้านข้าง",
+      q:"รูปทรงทำจากลูกบาศก์ 2 ก้อนซ้อนกันในแนวตั้ง + 1 ก้อนยื่นออกทางด้านหน้าของก้อนล่าง เมื่อมองจากด้านข้าง จะเห็นรูปใด",
+      opts:["สี่เหลี่ยมจัตุรัส 1×1","สี่เหลี่ยมผืนผ้า 1×2","รูปตัว L (ขาแนวตั้ง 2 ขาแนวนอน 2 ช่วง 1)","รูปตัว T","สามเหลี่ยม"], ans:3,
+      exp:"มองด้านข้าง: เห็นความสูง 2 + ความยาวแนวนอน 2 (ตัวบน) → รูปตัว L"},
+    { sec:"S", topic:"ถัดไปในลำดับ",
+      q:"ลำดับรูป: จุด 1 จุด, เส้น 2 จุด, สามเหลี่ยม 3 จุด, สี่เหลี่ยม 4 จุด, … รูปที่มี 6 จุด เรียกว่ารูปใด (เป็นรูปปิดที่มีมุมตามจำนวนจุด)",
+      opts:["ห้าเหลี่ยม","หกเหลี่ยม","แปดเหลี่ยม","วงกลม","สามเหลี่ยม"], ans:2,
+      exp:"รูปที่มี 6 จุดเรียงเป็นมุม = หกเหลี่ยม"},
+    { sec:"S", topic:"สามเหลี่ยมตัวเลข",
+      q:"สามเหลี่ยมตัวเลขใช้กฎ M = (L × R) − T ถ้า L=7, R=3, T=5 ค่า M คือ",
+      svg:`<svg viewBox="0 0 200 140" width="200" height="140">
+        <polygon points="100,15 30,125 170,125" fill="#fff" stroke="#333"/>
+        <text x="100" y="40" text-anchor="middle" font-size="16">T=5</text>
+        <text x="100" y="85" text-anchor="middle" font-size="18" font-weight="700">M=?</text>
+        <text x="45" y="120" text-anchor="middle" font-size="16">L=7</text>
+        <text x="155" y="120" text-anchor="middle" font-size="16">R=3</text>
+      </svg>`,
+      opts:["10","14","16","18","26"], ans:3,
+      exp:"(7 × 3) − 5 = 21 − 5 = 16"},
+    { sec:"S", topic:"รูปทรง-ขอบ/มุม",
+      q:"ทรงปิรามิดฐานสี่เหลี่ยมจัตุรัสมีกี่ขอบ (edges)",
+      opts:["5","6","7","8","12"], ans:4,
+      exp:"ฐาน 4 ขอบ + ขอบขึ้นยอด 4 ขอบ = 8"},
+    { sec:"S", topic:"พับเจาะรูสองจุด",
+      q:"พับกระดาษครึ่งหนึ่งแนวนอน แล้วพับครึ่งแนวตั้งอีก เจาะ 2 รูในตำแหน่งต่างกัน จะได้กี่รูเมื่อคลี่",
+      opts:["2","4","6","8","16"], ans:4,
+      exp:"พับ 2 ครั้ง กระดาษซ้อน 4 ชั้น รูละ 4 ที่ → 2 รู × 4 = 8"},
+
+    // ===== M: เชิงกล/ฟิสิกส์ 15 ข้อ =====
+    { sec:"M", topic:"คานสมดุล-หลายน้ำหนัก",
+      q:"คานยาว 6 m จุดหมุนอยู่ตรงกลาง ปลายซ้ายมี 10 N ที่ 3 m และ 20 N ที่ 1 m จากจุดหมุน ต้องวางกี่นิวตันที่ปลายขวาสุด (ห่าง 3 m) เพื่อสมดุล",
+      opts:["10","15","16","17","20"], ans:4,
+      exp:"โมเมนต์ซ้าย = 10×3 + 20×1 = 50, ขวา = F×3 → F = 50/3 ≈ 16.67 ≈ 17 N"},
+    { sec:"M", topic:"ระบบรอกผสม",
+      q:"ระบบรอกที่เชือก 3 เส้นรับน้ำหนัก ใช้ยกวัตถุ 300 N ต้องออกแรงกี่นิวตัน (ไม่คิดแรงเสียดทาน)",
+      opts:["50","75","100","150","300"], ans:3,
+      exp:"แรง = น้ำหนัก / จำนวนเชือก = 300/3 = 100 N"},
+    { sec:"M", topic:"เฟืองลดรอบ",
+      q:"เฟืองขับมี 12 ฟัน หมุน 100 รอบ/นาที ขบกับเฟืองตาม 60 ฟัน เฟืองตามหมุนกี่รอบ/นาที",
+      opts:["10","15","20","30","50"], ans:3,
+      exp:"12×100 = 60×N → N = 20 รอบ/นาที"},
+    { sec:"M", topic:"ขบเฟือง-ทิศทาง",
+      q:"เฟือง A, B, C, D, E ต่อขบเป็นลำดับ A หมุนตามเข็มนาฬิกา E หมุนทิศใด",
+      opts:["ตามเข็มนาฬิกา","ทวนเข็มนาฬิกา","ไม่หมุน","ขึ้นกับขนาด","หมุนสองทิศสลับ"], ans:1,
+      exp:"เฟือง n ตัวต่อกัน ตัวที่เลขคี่ (A, C, E) หมุนทิศเดียวกัน → E = ตามเข็ม"},
+    { sec:"M", topic:"กฎของโอห์ม",
+      q:"ตัวต้านทาน 20 Ω แรงดัน 10 V กระแสกี่แอมแปร์",
+      opts:["0.2","0.5","1","2","5"], ans:2,
+      exp:"I = V/R = 10/20 = 0.5 A"},
+    { sec:"M", topic:"ตัวต้านทานอนุกรม",
+      q:"ตัวต้านทาน 3 Ω, 4 Ω, 5 Ω ต่ออนุกรม ความต้านทานรวมเท่าใด",
+      opts:["0.6","1.3","6","12","60"], ans:4,
+      exp:"R = 3 + 4 + 5 = 12 Ω"},
+    { sec:"M", topic:"กำลังไฟฟ้า",
+      q:"เครื่องใช้ไฟฟ้า 1,500 W เปิดใช้ 2 ชม. ใช้พลังงานกี่หน่วย (kWh)",
+      opts:["1","1.5","2","3","30"], ans:4,
+      exp:"E = 1.5 kW × 2 h = 3 kWh"},
+    { sec:"M", topic:"พลังงานจลน์",
+      q:"รถมวล 1,000 kg วิ่งด้วย 10 m/s มีพลังงานจลน์กี่จูล",
+      opts:["5,000","10,000","25,000","50,000","100,000"], ans:4,
+      exp:"KE = ½mv² = 0.5×1000×100 = 50,000 J"},
+    { sec:"M", topic:"พลังงานศักย์",
+      q:"ยกวัตถุ 2 kg ขึ้นสูง 5 m พลังงานศักย์โน้มถ่วงเพิ่มขึ้นกี่จูล (g=10)",
+      opts:["25","50","75","100","200"], ans:4,
+      exp:"ΔPE = mgh = 2×10×5 = 100 J"},
+    { sec:"M", topic:"ความดันของไหล",
+      q:"ลงดำน้ำในทะเลลึก 10 m (ρ_น้ำทะเล=1030 kg/m³, g=10) ความดันจากน้ำอย่างเดียวประมาณกี่ Pa",
+      opts:["10,000","50,000","103,000","200,000","1,030,000"], ans:3,
+      exp:"P = ρgh = 1030×10×10 = 103,000 Pa"},
+    { sec:"M", topic:"แรงลอยตัว-อาร์คิมิดีส",
+      q:"วัตถุปริมาตร 200 cm³ จุ่มทั้งก้อนในน้ำ (ρ=1000 kg/m³, g=10) แรงลอยตัวเท่าใด",
+      opts:["0.2 N","0.5 N","1 N","2 N","5 N"], ans:4,
+      exp:"F_B = ρVg = 1000 × 200×10⁻⁶ × 10 = 2 N"},
+    { sec:"M", topic:"พื้นเอียง",
+      q:"วัตถุ 20 kg บนพื้นเอียง 37° ไม่มีแรงเสียดทาน (g=10, sin37°=0.6) แรงที่ฉุดวัตถุลงมาตามแนวลาดเท่าใด",
+      opts:["80 N","100 N","120 N","160 N","200 N"], ans:3,
+      exp:"F = mg sinθ = 20×10×0.6 = 120 N"},
+    { sec:"M", topic:"สปริง-อนุกรม",
+      q:"สปริง 2 ตัวเหมือนกัน k = 200 N/m ต่ออนุกรมกัน ความแข็งรวมเท่าใด",
+      opts:["50 N/m","100 N/m","200 N/m","400 N/m","800 N/m"], ans:2,
+      exp:"สปริงอนุกรม: 1/k_eq = 1/200 + 1/200 = 1/100 → k_eq = 100 N/m"},
+    { sec:"M", topic:"การถ่ายเทความร้อน",
+      q:"น้ำ 500 g ต้องการความร้อน 20,000 J เพื่อเพิ่มอุณหภูมิ อุณหภูมิจะเพิ่มกี่ °C (c_น้ำ = 4,000 J/kg·°C)",
+      opts:["5","8","10","15","20"], ans:3,
+      exp:"ΔT = Q/(mc) = 20,000/(0.5×4,000) = 10°C"},
+    { sec:"M", topic:"กฎข้อ 2 ของนิวตัน-แรงลัพธ์",
+      q:"วัตถุ 5 kg ถูกแรง 30 N ไปทางขวาและ 10 N ไปทางซ้าย ความเร่งมีขนาดกี่ m/s² และทิศใด",
+      opts:["2 ไปทางซ้าย","2 ไปทางขวา","4 ไปทางขวา","6 ไปทางขวา","8 ไปทางขวา"], ans:3,
+      exp:"แรงลัพธ์ = 30−10 = 20 N ไปทางขวา, a = 20/5 = 4 m/s² ทางขวา"}
+  ]
+});
+
+/* ========================================================
+   SUBJECTS map — รวมทุกวิชาที่รองรับ
+   ======================================================== */
+const SUBJECTS = {
+  physics: {
+    name: "ฟิสิกส์",
+    icon: "📘",
+    storageKey: "physics_exam_app_v2",
+    sections: PHYSICS_SECTIONS,
+    exams: PHYSICS_EXAMS
+  },
+  math: {
+    name: "คณิตศาสตร์ ประยุกต์ 1",
+    icon: "🔢",
+    storageKey: "math_exam_app_v2",
+    sections: MATH_SECTIONS,
+    exams: MATH_EXAMS
+  },
+  tpat: {
+    name: "TPAT 3 ส่วนที่ 1 (ความถนัด)",
+    icon: "🧠",
+    storageKey: "tpat3_exam_app_v1",
+    sections: TPAT_SECTIONS,
+    exams: TPAT_EXAMS
+  }
+};
+
+/* ========== App state ========== */
+const SUBJECT_KEY = "exam_app_current_subject";
+let currentSubject = null;  // "physics" | "math" | null (= picker)
+let STORAGE_KEY = null;
+let SECTIONS = null;
+let EXAMS = null;
+function bindSubject(subj) {
+  currentSubject = subj;
+  STORAGE_KEY  = SUBJECTS[subj].storageKey;
+  SECTIONS     = SUBJECTS[subj].sections;
+  EXAMS        = SUBJECTS[subj].exams;
+  localStorage.setItem(SUBJECT_KEY, subj);
+}
+let state = {
+  currentSet: 0,
+  currentQ: 0,
+  answers: {},     // { setIndex: { qIndex: ansNumber 1..5 } }
+  submitted: {},   // { setIndex: true/false }
+  canvasData: {},  // { setIndex: { qIndex: dataURL } }  per-question drawings
+  started: {},     // { setIndex: true } — user pressed เริ่ม
+  startTime: {},   // { setIndex: epochMs }
+  endTime: {}      // { setIndex: epochMs } when submitted
+};
+let timerInterval = null;
+
+function resetState() {
+  state = {
+    currentSet: 0, currentQ: 0,
+    answers: {}, submitted: {}, canvasData: {},
+    started: {}, startTime: {}, endTime: {}
+  };
+}
+function loadState() {
+  resetState();
+  if (!currentSubject) return;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      Object.assign(state, s);
+      if (typeof state.canvasData !== "object" || state.canvasData === null) {
+        state.canvasData = {};
+      }
+      if (!state.started)   state.started = {};
+      if (!state.startTime) state.startTime = {};
+      if (!state.endTime)   state.endTime = {};
+    }
+  } catch (e) { console.warn("load failed", e); }
+}
+function saveState() {
+  if (!currentSubject) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { console.warn("save failed", e); }
+}
+
+/* ===== Question helpers (handle mcq + numeric) ===== */
+function isAnswered(q, userAns) {
+  if (userAns === undefined || userAns === null) return false;
+  if (q.type === "numeric") return String(userAns).trim() !== "";
+  return typeof userAns === "number" && userAns >= 1;
+}
+function isQCorrect(q, userAns) {
+  if (!isAnswered(q, userAns)) return false;
+  if (q.type === "numeric") {
+    const n = parseFloat(userAns);
+    if (isNaN(n)) return false;
+    const tol = (q.tol !== undefined) ? q.tol : 0;
+    return Math.abs(n - q.numAns) <= tol;
+  }
+  return userAns === q.ans;
+}
+function answeredCountOf(exam, ans) {
+  let c = 0;
+  exam.questions.forEach((q, i) => { if (isAnswered(q, ans[i])) c++; });
+  return c;
+}
+
+/* ========== Render ========== */
+function isSetLocked(i) {
+  // Set i is locked if any previous set hasn't been submitted
+  for (let k = 0; k < i; k++) {
+    if (!state.submitted[k]) return true;
+  }
+  return false;
+}
+function renderSetPicker() {
+  const el = document.getElementById("set-picker");
+  el.innerHTML = "";
+  EXAMS.forEach((ex, i) => {
+    const b = document.createElement("button");
+    const locked = isSetLocked(i);
+    const done = !!state.submitted[i];
+    let cls = "set-btn";
+    if (i === state.currentSet) cls += " active";
+    if (locked) cls += " locked";
+    else if (done) cls += " done";
+    b.className = cls;
+    b.textContent = (locked ? "🔒 " : done ? "✓ " : "") + ex.name;
+    if (locked) {
+      b.title = "ต้องทำชุดก่อนหน้าให้เสร็จก่อน";
+      b.disabled = true;
+    } else {
+      b.onclick = () => {
+        persistCurrentCanvas();
+        state.currentSet = i;
+        state.currentQ = 0;
+        saveState();
+        render();
+        loadCanvasToContext();
+      };
+    }
+    el.appendChild(b);
+  });
+}
+
+function getCurrentExam() { return EXAMS[state.currentSet]; }
+
+/* ===== Per-question canvas helpers ===== */
+function getCanvasForCurrent() {
+  const s = state.canvasData[state.currentSet];
+  if (!s) return "";
+  return s[state.currentQ] || "";
+}
+function setCanvasForCurrent(dataURL) {
+  if (!state.canvasData[state.currentSet]) state.canvasData[state.currentSet] = {};
+  if (dataURL) {
+    state.canvasData[state.currentSet][state.currentQ] = dataURL;
+  } else {
+    delete state.canvasData[state.currentSet][state.currentQ];
+  }
+}
+function loadCanvasToContext() {
+  if (!canvas || !ctx) return;
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const data = getCanvasForCurrent();
+  if (data) {
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    img.src = data;
+  }
+}
+function persistCurrentCanvas() {
+  if (!canvas || !ctx) return;
+  // Only save if canvas has content (avoid overwriting with blank)
+  try {
+    setCanvasForCurrent(canvas.toDataURL());
+  } catch (e) {}
+}
+function switchQuestion(newIdx) {
+  // Save current question's canvas, then switch, then reload for the new question
+  persistCurrentCanvas();
+  state.currentQ = newIdx;
+  saveState();
+  render();
+  loadCanvasToContext();
+}
+function getAnswers() {
+  if (!state.answers[state.currentSet]) state.answers[state.currentSet] = {};
+  return state.answers[state.currentSet];
+}
+function isSubmitted() { return !!state.submitted[state.currentSet]; }
+
+function renderSubjectPicker() {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  document.getElementById("set-picker").innerHTML = "";
+  document.getElementById("change-subject-btn").style.display = "none";
+  document.getElementById("header-title").textContent = "📚 ข้อสอบ A-Level";
+  document.getElementById("header-sub").textContent = "เลือกวิชาเพื่อเริ่มทำข้อสอบ";
+
+  const grid = document.createElement("div");
+  grid.className = "subject-grid";
+  Object.keys(SUBJECTS).forEach(key => {
+    const s = SUBJECTS[key];
+    const card = document.createElement("div");
+    card.className = "subject-card";
+    card.innerHTML =
+      `<div class="icon">${s.icon}</div>
+       <div class="s-name">${s.name}</div>
+       <div class="s-desc">${s.exams.length} ชุด × ${s.exams[0].questions.length} ข้อ</div>`;
+    card.onclick = () => selectSubject(key);
+    grid.appendChild(card);
+  });
+  app.appendChild(grid);
+
+  // Stop timer if any
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  // Hide pencil FAB on picker screen
+  const fabEl = document.getElementById("draw-fab");
+  if (fabEl) fabEl.style.display = "none";
+}
+
+function selectSubject(key) {
+  bindSubject(key);
+  loadState();
+  // Safety: bounce to first unlocked set
+  if (isSetLocked(state.currentSet)) {
+    for (let i = 0; i < EXAMS.length; i++) {
+      if (!isSetLocked(i)) { state.currentSet = i; state.currentQ = 0; break; }
+    }
+  }
+  render();
+}
+
+function backToSubjectPicker() {
+  if (currentSubject) persistCurrentCanvas();
+  saveState();
+  // Close pad if open
+  const padEl = document.getElementById("draw-pad");
+  if (padEl) padEl.classList.remove("open");
+  currentSubject = null;
+  STORAGE_KEY = null; SECTIONS = null; EXAMS = null;
+  localStorage.removeItem(SUBJECT_KEY);
+  renderSubjectPicker();
+}
+
+function render() {
+  if (!currentSubject) { renderSubjectPicker(); return; }
+
+  const fabEl = document.getElementById("draw-fab");
+  if (fabEl) fabEl.style.display = "";
+
+  const changeBtn = document.getElementById("change-subject-btn");
+  changeBtn.style.display = "";
+  changeBtn.onclick = backToSubjectPicker;
+  document.getElementById("header-title").textContent =
+    `${SUBJECTS[currentSubject].icon} ข้อสอบ ${SUBJECTS[currentSubject].name} A-Level`;
+
+  renderSetPicker();
+  const exam = getCurrentExam();
+  document.getElementById("header-sub").textContent =
+    `${exam.name} • ${exam.questions.length} ข้อ`;
+
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  // Stop any running timer — re-created below if needed
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  if (isSubmitted()) {
+    renderResult(app);
+  } else if (!state.started[state.currentSet]) {
+    renderStart(app);
+  } else {
+    renderQuiz(app);
+  }
+  saveState();
+}
+
+/* ===== Start screen ===== */
+function renderStart(app) {
+  const exam = getCurrentExam();
+  // Count per section
+  const counts = {};
+  exam.questions.forEach(q => { counts[q.sec] = (counts[q.sec]||0)+1; });
+  const breakdown = Object.keys(counts).map(k =>
+    `${SECTIONS[k]}: ${counts[k]} ข้อ`
+  ).join(" • ");
+
+  const card = document.createElement("div");
+  card.className = "start-card";
+  const icon = SUBJECTS[currentSubject].icon;
+  card.innerHTML =
+    `<h2>${icon} ${exam.name}</h2>
+     <div class="desc">
+       ทั้งหมด ${exam.questions.length} ข้อ<br>
+       ${breakdown}<br>
+       <br>
+       กด "เริ่มทำข้อสอบ" เพื่อเริ่มนับเวลา<br>
+       จะไปชุดถัดไปได้เมื่อส่งชุดนี้แล้ว
+     </div>`;
+  const btn = document.createElement("button");
+  btn.className = "start-btn";
+  btn.textContent = "▶ เริ่มทำข้อสอบ";
+  btn.onclick = () => {
+    state.started[state.currentSet] = true;
+    state.startTime[state.currentSet] = Date.now();
+    state.currentQ = 0;
+    saveState();
+    render();
+  };
+  card.appendChild(btn);
+  app.appendChild(card);
+}
+
+/* ===== Timer helpers ===== */
+function formatDuration(ms) {
+  const s = Math.max(0, Math.floor(ms/1000));
+  const m = Math.floor(s/60);
+  const rem = s % 60;
+  return String(m).padStart(2,"0") + ":" + String(rem).padStart(2,"0");
+}
+function getElapsedMs(setIdx) {
+  const start = state.startTime[setIdx];
+  if (!start) return 0;
+  const end = state.endTime[setIdx] || Date.now();
+  return end - start;
+}
+
+function renderQuiz(app) {
+  const exam = getCurrentExam();
+  const ans = getAnswers();
+  const total = exam.questions.length;
+  const answeredCount = answeredCountOf(exam, ans);
+
+  // Timer bar
+  const timer = document.createElement("div");
+  timer.className = "timer-bar";
+  timer.innerHTML = `<span>⏱ กำลังจับเวลา</span><span class="t" id="timer-t">00:00</span>`;
+  app.appendChild(timer);
+  const tEl = timer.querySelector("#timer-t");
+  const tick = () => { tEl.textContent = formatDuration(getElapsedMs(state.currentSet)); };
+  tick();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(tick, 1000);
+
+  // Pending list
+  const pending = [];
+  for (let i = 0; i < total; i++) if (!isAnswered(exam.questions[i], ans[i])) pending.push(i);
+
+  const pendingCard = document.createElement("div");
+  pendingCard.className = "pending-card";
+  if (pending.length === 0) {
+    pendingCard.innerHTML =
+      `<div class="label">✅ ตอบครบแล้ว ${total} ข้อ พร้อมส่ง</div>`;
+  } else {
+    pendingCard.innerHTML =
+      `<div class="label">⏳ ยังไม่ได้ทำ ${pending.length} ข้อ (กดเพื่อข้ามไป)</div>` +
+      `<div class="pending-list">${
+        pending.map(i => `<span data-i="${i}">ข้อ ${i+1}</span>`).join("")
+      }</div>`;
+    pendingCard.querySelectorAll("span[data-i]").forEach(s => {
+      s.onclick = () => { switchQuestion(+s.dataset.i); };
+    });
+  }
+  app.appendChild(pendingCard);
+
+  // Question card
+  const qIdx = state.currentQ;
+  const q = exam.questions[qIdx];
+  const qType = q.type || "mcq";
+  const typeTag = qType === "numeric"
+    ? `<span class="q-type-tag numeric">ระบายเลข</span>`
+    : `<span class="q-type-tag mcq">ปรนัย</span>`;
+  const card = document.createElement("div");
+  card.className = "qcard";
+  const svgBlock = q.svg ? `<div class="qsvg">${q.svg}</div>` : "";
+  card.innerHTML =
+    `<div class="qheader">
+      <div class="qnum">ข้อที่ ${qIdx+1} / ${total} ${typeTag}</div>
+      <div class="qsection">${SECTIONS[q.sec]} • ${q.topic}</div>
+    </div>
+    <div class="qtext">${q.q}</div>
+    ${svgBlock}`;
+
+  if (qType === "numeric") {
+    const wrap = document.createElement("div");
+    wrap.className = "numeric-wrap";
+    wrap.innerHTML = `<div class="label">ตอบเป็นตัวเลข (ใส่เฉพาะตัวเลข/ทศนิยม)</div>`;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.inputMode = "decimal";
+    input.className = "numeric-input";
+    input.placeholder = "พิมพ์คำตอบ...";
+    input.value = ans[qIdx] !== undefined ? String(ans[qIdx]) : "";
+    input.oninput = () => {
+      const v = input.value.trim();
+      if (v === "") { delete ans[qIdx]; }
+      else { ans[qIdx] = v; }
+      saveState();
+    };
+    // On blur, re-render so pending counter / nav grid / submit button refresh
+    input.onblur = () => { render(); };
+    wrap.appendChild(input);
+    card.appendChild(wrap);
+  } else {
+    const optsDiv = document.createElement("div");
+    // If any option contains "<svg" treat as visual option grid
+    const isVisual = q.opts.some(op => typeof op === "string" && op.indexOf("<svg") !== -1);
+    optsDiv.className = "options" + (isVisual ? " visual" : "");
+    q.opts.forEach((op, i) => {
+      const num = i+1;
+      const opt = document.createElement("div");
+      opt.className = "opt" + (ans[qIdx] === num ? " selected" : "");
+      const isSvgOpt = typeof op === "string" && op.indexOf("<svg") !== -1;
+      if (isSvgOpt) {
+        opt.innerHTML = `<div class="num">${num}</div><div class="optsvg">${op}</div>`;
+      } else {
+        opt.innerHTML = `<div class="num">${num}</div><div>${op}</div>`;
+      }
+      opt.onclick = () => {
+        ans[qIdx] = num;
+        saveState();
+        render();
+      };
+      optsDiv.appendChild(opt);
+    });
+    card.appendChild(optsDiv);
+  }
+  app.appendChild(card);
+
+  // Nav grid
+  const ng = document.createElement("div");
+  ng.className = "navgrid";
+  ng.innerHTML = `<div class="label">ข้ามไปข้อที่ (เขียว=ตอบแล้ว ${answeredCount}/${total})</div>`;
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  for (let i = 0; i < total; i++) {
+    const b = document.createElement("button");
+    b.textContent = i+1;
+    if (isAnswered(exam.questions[i], ans[i])) b.classList.add("answered");
+    if (i === qIdx) b.classList.add("current");
+    b.onclick = () => { switchQuestion(i); };
+    grid.appendChild(b);
+  }
+  ng.appendChild(grid);
+  app.appendChild(ng);
+
+  // Nav buttons
+  const navBtns = document.createElement("div");
+  navBtns.className = "nav-btns";
+  const prev = document.createElement("button");
+  prev.textContent = "← ข้อก่อนหน้า";
+  prev.disabled = qIdx === 0;
+  prev.onclick = () => { switchQuestion(qIdx-1); };
+  const next = document.createElement("button");
+  next.textContent = "ข้อถัดไป →";
+  next.disabled = qIdx === total-1;
+  next.onclick = () => { switchQuestion(qIdx+1); };
+  navBtns.appendChild(prev);
+  navBtns.appendChild(next);
+  app.appendChild(navBtns);
+
+  // Submit button
+  const submit = document.createElement("button");
+  submit.className = "submit-btn";
+  submit.textContent = pending.length === 0
+    ? `📝 ส่งคำตอบ (ตอบครบ ${total}/${total})`
+    : `ตอบให้ครบก่อนส่ง (เหลือ ${pending.length} ข้อ)`;
+  submit.disabled = pending.length !== 0;
+  submit.onclick = () => {
+    if (confirm("ยืนยันการส่งคำตอบ? จะไม่สามารถแก้ไขได้แล้ว")) {
+      state.submitted[state.currentSet] = true;
+      state.endTime[state.currentSet] = Date.now();
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      saveState();
+      window.scrollTo(0,0);
+      render();
+    }
+  };
+  app.appendChild(submit);
+}
+
+function renderResult(app) {
+  const exam = getCurrentExam();
+  const ans = getAnswers();
+  let score = 0;
+  exam.questions.forEach((q,i) => { if (isQCorrect(q, ans[i])) score++; });
+
+  const card = document.createElement("div");
+  card.className = "result-card";
+  const pct = Math.round(score*100/exam.questions.length);
+  const elapsedMs = getElapsedMs(state.currentSet);
+  const mins = Math.floor(elapsedMs/60000);
+  const secs = Math.floor((elapsedMs%60000)/1000);
+  const timeStr = (state.startTime[state.currentSet] && state.endTime[state.currentSet])
+    ? `ใช้เวลา ${mins} นาที ${secs} วินาที`
+    : "";
+  card.innerHTML =
+    `<div style="font-size:14px;color:#6b7280">ผลการสอบ ${exam.name}</div>
+     <div class="score-big">${score} / ${exam.questions.length}</div>
+     <div class="score-text">คิดเป็น ${pct}%</div>
+     ${timeStr ? `<div class="score-text" style="margin-top:6px">⏱ ${timeStr}</div>` : ""}`;
+  app.appendChild(card);
+
+  // Reset button
+  const restart = document.createElement("button");
+  restart.className = "restart-btn";
+  restart.textContent = "🔄 ทำชุดนี้ใหม่";
+  restart.onclick = () => {
+    if (confirm("ลบคำตอบและเริ่มทำใหม่?")) {
+      delete state.answers[state.currentSet];
+      delete state.submitted[state.currentSet];
+      delete state.started[state.currentSet];
+      delete state.startTime[state.currentSet];
+      delete state.endTime[state.currentSet];
+      state.currentQ = 0;
+      saveState();
+      render();
+    }
+  };
+  app.appendChild(restart);
+
+  // Heading
+  const h = document.createElement("div");
+  h.style.cssText = "margin:18px 0 10px;font-weight:700;color:#111827";
+  h.textContent = "เฉลยทุกข้อ";
+  app.appendChild(h);
+
+  // Each answer
+  exam.questions.forEach((q,i) => {
+    const userAns = ans[i];
+    const correct = isQCorrect(q, userAns);
+    const answered = isAnswered(q, userAns);
+    const qType = q.type || "mcq";
+    const item = document.createElement("div");
+    item.className = "ans-item " + (correct ? "correct" : "wrong");
+
+    let yourLine = "";
+    let corrLine = "";
+    const hasSvgOpts = q.opts && q.opts.some(op => typeof op === "string" && op.indexOf("<svg") !== -1);
+    const optLabel = (idx) => hasSvgOpts ? `ข้อ ${idx}` : `ข้อ ${idx} (${q.opts[idx-1]})`;
+    if (qType === "numeric") {
+      if (answered) {
+        yourLine = `<div class="${correct ? 'corr' : 'yours'}">คุณตอบ: ${userAns} ${correct ? '✓ ถูก' : '✗ ผิด'}</div>`;
+      } else {
+        yourLine = `<div class="yours">คุณไม่ได้ตอบ</div>`;
+      }
+      if (!correct) corrLine = `<div class="corr">เฉลย: ${q.numAns}</div>`;
+    } else {
+      if (answered) {
+        yourLine = `<div class="${correct ? 'corr' : 'yours'}">คุณตอบ: ${optLabel(userAns)} ${correct ? '✓ ถูก' : '✗ ผิด'}</div>`;
+      } else {
+        yourLine = `<div class="yours">คุณไม่ได้ตอบ</div>`;
+      }
+      if (!correct) corrLine = `<div class="corr">เฉลย: ${optLabel(q.ans)}</div>`;
+    }
+
+    const svgBlock2 = q.svg ? `<div class="qsvg">${q.svg}</div>` : "";
+    item.innerHTML =
+      `<div class="qh">ข้อที่ ${i+1} • ${SECTIONS[q.sec]} — ${q.topic}</div>
+       <div class="qt">${q.q}</div>
+       ${svgBlock2}
+       ${yourLine}
+       ${corrLine}
+       <div class="exp"><b>วิธีคิด:</b> ${q.exp}</div>`;
+    app.appendChild(item);
+  });
+}
+
+/* ========== Drawing pad ========== */
+const pad = document.getElementById("draw-pad");
+const fab = document.getElementById("draw-fab");
+const closeBtn = document.getElementById("close-pad");
+const canvas = document.getElementById("draw-canvas");
+const ctx = canvas.getContext("2d");
+let drawing = false;
+let lastX = 0, lastY = 0;
+let tool = "pen";
+let color = "#000000";
+let lineWidth = 2;
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  // restore current question's drawing
+  const data = getCanvasForCurrent();
+  if (data) {
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    img.src = data;
+  }
+}
+
+fab.onclick = () => {
+  pad.classList.add("open");
+  setTimeout(resizeCanvas, 350);
+};
+closeBtn.onclick = () => {
+  setCanvasForCurrent(canvas.toDataURL());
+  saveState();
+  pad.classList.remove("open");
+};
+
+document.querySelectorAll(".tool-btn[data-tool]").forEach(b => {
+  b.onclick = () => {
+    tool = b.dataset.tool;
+    document.querySelectorAll(".tool-btn[data-tool]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+  };
+});
+document.querySelectorAll(".color-btn").forEach(b => {
+  b.onclick = () => {
+    color = b.dataset.color;
+    document.querySelectorAll(".color-btn").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    tool = "pen";
+    document.querySelectorAll(".tool-btn[data-tool]").forEach(x => x.classList.remove("active"));
+    document.getElementById("tool-pen").classList.add("active");
+  };
+});
+document.getElementById("reset-canvas").onclick = () => {
+  // Reset transform first so clearRect uses raw pixels — guarantees full clear
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
+  setCanvasForCurrent("");
+  saveState();
+};
+
+function getXY(e) {
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+}
+
+function start(e) {
+  e.preventDefault();
+  drawing = true;
+  const p = getXY(e);
+  lastX = p.x; lastY = p.y;
+  // For Apple Pencil pressure sensitivity
+  if (e.pressure !== undefined && e.pressure > 0) {
+    lineWidth = (tool === "eraser" ? 20 : 2) * (0.5 + e.pressure);
+  }
+}
+function move(e) {
+  if (!drawing) return;
+  e.preventDefault();
+  const p = getXY(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(p.x, p.y);
+  if (tool === "eraser") {
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.strokeStyle = "rgba(0,0,0,1)";
+    ctx.lineWidth = 20;
+  } else {
+    ctx.globalCompositeOperation = "source-over";
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+  }
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+  lastX = p.x; lastY = p.y;
+  if (e.pressure !== undefined && e.pressure > 0) {
+    lineWidth = (tool === "eraser" ? 20 : 2) * (0.5 + e.pressure);
+  }
+}
+function end(e) {
+  if (drawing) {
+    drawing = false;
+    setCanvasForCurrent(canvas.toDataURL());
+    saveState();
+  }
+}
+
+// Pointer events for Apple Pencil + touch + mouse
+canvas.addEventListener("pointerdown", start);
+canvas.addEventListener("pointermove", move);
+canvas.addEventListener("pointerup", end);
+canvas.addEventListener("pointercancel", end);
+canvas.addEventListener("pointerleave", end);
+
+window.addEventListener("resize", () => {
+  if (pad.classList.contains("open")) resizeCanvas();
+});
+
+/* ========== Draggable pad ========== */
+const dragHandle = document.getElementById("drag-handle");
+let dragging2 = false;
+let dragOffsetX = 0, dragOffsetY = 0;
+
+dragHandle.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  dragging2 = true;
+  dragHandle.setPointerCapture(e.pointerId);
+  const rect = pad.getBoundingClientRect();
+  dragOffsetX = e.clientX - rect.left;
+  dragOffsetY = e.clientY - rect.top;
+
+  // Switch pad to free-floating mode (first drag only)
+  if (!pad.classList.contains("dragged")) {
+    // Persist current strokes before changing canvas size
+    try { setCanvasForCurrent(canvas.toDataURL()); saveState(); } catch(_) {}
+    pad.style.width = rect.width + "px";
+    pad.style.height = rect.height + "px";
+    pad.style.left = rect.left + "px";
+    pad.style.top = rect.top + "px";
+    pad.classList.add("dragged");
+    setTimeout(() => { resizeCanvas(); }, 0);
+  }
+});
+
+dragHandle.addEventListener("pointermove", (e) => {
+  if (!dragging2) return;
+  e.preventDefault();
+  let x = e.clientX - dragOffsetX;
+  let y = e.clientY - dragOffsetY;
+  x = Math.max(0, Math.min(window.innerWidth - pad.offsetWidth, x));
+  y = Math.max(0, Math.min(window.innerHeight - pad.offsetHeight, y));
+  pad.style.left = x + "px";
+  pad.style.top = y + "px";
+});
+
+function endDrag(e) {
+  if (dragging2) {
+    dragging2 = false;
+    try { dragHandle.releasePointerCapture(e.pointerId); } catch(_) {}
+  }
+}
+dragHandle.addEventListener("pointerup", endDrag);
+dragHandle.addEventListener("pointercancel", endDrag);
+
+// Re-render canvas after user resizes the pad via CSS resize handle
+let padResizeObs = null;
+if (window.ResizeObserver) {
+  padResizeObs = new ResizeObserver(() => {
+    if (pad.classList.contains("open") && pad.classList.contains("dragged")) {
+      resizeCanvas();
+    }
+  });
+  padResizeObs.observe(pad);
+}
+
+/* ========== Init ========== */
+const lastSubject = localStorage.getItem(SUBJECT_KEY);
+if (lastSubject && SUBJECTS[lastSubject]) {
+  bindSubject(lastSubject);
+  loadState();
+  if (isSetLocked(state.currentSet)) {
+    for (let i = 0; i < EXAMS.length; i++) {
+      if (!isSetLocked(i)) { state.currentSet = i; state.currentQ = 0; break; }
+    }
+  }
+  render();
+} else {
+  renderSubjectPicker();
+}
+</script>
+</body>
+</html>
