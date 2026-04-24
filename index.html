@@ -5,7 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ข้อสอบฟิสิกส์ A-Level</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  /* Allow selection/typing inside form fields only */
+  input, textarea, [contenteditable="true"] {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    -webkit-touch-callout: default !important;
+  }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sukhumvit Set", "Noto Sans Thai", sans-serif;
     background: #f5f6f8;
@@ -13,6 +31,8 @@
     line-height: 1.6;
     min-height: 100vh;
     padding-bottom: 80px;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .container { max-width: 820px; margin: 0 auto; padding: 16px; }
 
@@ -808,6 +828,9 @@
     transform: translateY(100%);
     transition: transform 0.3s ease;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   .draw-pad.open { display: flex; transform: translateY(0); }
   .draw-pad.dragged {
@@ -816,10 +839,38 @@
     transform: none;
     transition: none;
     border-radius: 12px;
-    resize: both;
-    overflow: hidden;
+    overflow: visible;
     min-width: 280px;
     min-height: 220px;
+  }
+  /* Custom resize handles (active only in .dragged mode) */
+  .resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 12;
+    touch-action: none;
+    user-select: none;
+    display: none;
+  }
+  .draw-pad.dragged .resize-handle { display: block; }
+  .resize-handle-nw, .resize-handle-ne, .resize-handle-sw, .resize-handle-se {
+    width: 18px; height: 18px;
+  }
+  .resize-handle-nw { top: -4px; left: -4px; cursor: nwse-resize; }
+  .resize-handle-ne { top: -4px; right: -4px; cursor: nesw-resize; }
+  .resize-handle-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+  .resize-handle-se { bottom: -4px; right: -4px; cursor: nwse-resize;
+    background: linear-gradient(135deg, transparent 50%, #9ca3af 50%, #9ca3af 60%, transparent 60%, transparent 70%, #9ca3af 70%, #9ca3af 80%, transparent 80%); }
+  .resize-handle-n, .resize-handle-s { left: 14px; right: 14px; height: 8px; }
+  .resize-handle-e, .resize-handle-w { top: 14px; bottom: 14px; width: 8px; }
+  .resize-handle-n { top: -4px; cursor: ns-resize; }
+  .resize-handle-s { bottom: -4px; cursor: ns-resize; }
+  .resize-handle-e { right: -4px; cursor: ew-resize; }
+  .resize-handle-w { left: -4px; cursor: ew-resize; }
+  /* While pad is open and in dragged mode, body text shouldn't be selectable */
+  body.pad-dragging {
+    user-select: none;
+    -webkit-user-select: none;
   }
   .drag-handle {
     padding: 6px 10px;
@@ -872,6 +923,9 @@
     touch-action: none;
     background: #fff;
     min-height: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   .draw-canvas {
     display: block;
@@ -882,6 +936,10 @@
     cursor: crosshair;
     transform-origin: 0 0;
     will-change: transform;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
   }
   .zoom-indicator {
     position: absolute;
@@ -932,6 +990,14 @@
 
 <!-- Drawing pad -->
 <div class="draw-pad" id="draw-pad">
+  <div class="resize-handle resize-handle-nw" data-dir="nw"></div>
+  <div class="resize-handle resize-handle-n"  data-dir="n"></div>
+  <div class="resize-handle resize-handle-ne" data-dir="ne"></div>
+  <div class="resize-handle resize-handle-w"  data-dir="w"></div>
+  <div class="resize-handle resize-handle-e"  data-dir="e"></div>
+  <div class="resize-handle resize-handle-sw" data-dir="sw"></div>
+  <div class="resize-handle resize-handle-s"  data-dir="s"></div>
+  <div class="resize-handle resize-handle-se" data-dir="se"></div>
   <div class="drag-handle" id="drag-handle">⋮⋮⋮ ลากเพื่อย้ายกระดาน ⋮⋮⋮</div>
   <div class="draw-toolbar">
     <button class="tool-btn active" data-tool="pen" id="tool-pen">🖊 ปากกา</button>
@@ -973,51 +1039,51 @@ const PHYSICS_EXAMS = [
     questions: [
       // --- A: กลศาสตร์ (10 ข้อ) ---
       { sec:"A", topic:"ธรรมชาติฟิสิกส์",
-        q:"การวัดมวลของวัตถุได้ค่า 12.34, 12.36, 12.35, 12.37 กรัม ค่าเฉลี่ยและความไม่แน่นอนคือ",
-        opts:["12.35 ± 0.01 g","12.35 ± 0.02 g","12.36 ± 0.01 g","12.36 ± 0.02 g","12.34 ± 0.03 g"],
-        ans:4, exp:"[ค่าเฉลี่ย] x̄ = (12.34+12.36+12.35+12.37)/4 = 49.42/4 = 12.355 ≈ 12.36 g | [ความไม่แน่นอน] Δx = (max−min)/2 = (12.37−12.34)/2 = 0.015 ≈ 0.02 g | [คำตอบ] 12.36 ± 0.02 g"},
+        q:"วัดเส้นผ่านศูนย์กลางทรงกลม d = (8.42±0.05) cm และมวล m = (512±2) g ความหนาแน่นของทรงกลมเป็น (ρ = m/(πd³/6), ตอบประมาณ ... g/cm³)",
+        opts:["8.2±0.4","8.5±0.5","8.8±0.6","9.1±0.7","9.4±0.8"],
+        ans:3, exp:"[หาค่าเฉลี่ย] V = πd³/6 = π(8.42)³/6 ≈ 311.8 cm³ → ρ = 512/311.8 ≈ 8.82 g/cm³ | [ความไม่แน่นอน] δρ/ρ = √[(δm/m)² + (3δd/d)²] = √[(2/512)² + (3×0.05/8.42)²] ≈ √[0.0000153 + 0.00319] ≈ 0.0565 → δρ ≈ 0.50 g/cm³ | [คำตอบ] 8.8±0.6 g/cm³"},
       { sec:"A", topic:"การเคลื่อนที่แนวตรง",
-        q:"รถยนต์เคลื่อนที่จากหยุดนิ่งด้วยความเร่ง 2 m/s² เป็นเวลา 6 วินาที จากนั้นคงความเร็วต่ออีก 4 วินาที ระยะทางทั้งหมดเป็นกี่เมตร",
-        opts:["36","48","60","84","96"],
-        ans:4, exp:"ช่วงแรก: s₁=½(2)(36)=36 m, v=12 m/s ช่วงหลัง: s₂=12×4=48 m รวม=84 m"},
+        q:"รถเคลื่อนที่บนถนนมีสัมประสิทธิ์เสียดทาน μ = 0.25 เข้าข่องก้อนหินและเสียความเร็วจาก 25 m/s เป็น 15 m/s ระยะทางการเบรกประมาณเท่าใด (g=10)",
+        opts:["40 m","50 m","60 m","80 m","100 m"],
+        ans:5, exp:"[แรงเสียดทาน] F = μmg → a = μg = 0.25×10 = 2.5 m/s² (ทิศตรงข้ามการเคลื่อนที่) | [สมการคิเนมาติกส์] v² = u² − 2as → (15)² = (25)² − 2(2.5)s | [แก้] 225 = 625 − 5s → s = 80 m"},
       { sec:"A", topic:"การเคลื่อนที่แนวตรง",
-        q:"ยิงวัตถุขึ้นในแนวดิ่งด้วยความเร็วต้น 30 m/s วัตถุจะกลับมาถึงพื้นในเวลาเท่าใด (g=10 m/s²)",
-        opts:["3 s","4 s","5 s","6 s","7 s"],
-        ans:4, exp:"ขึ้น: t = u/g = 30/10 = 3 s ลง: 3 s รวม = 6 s"},
+        q:"ยิงวัตถุขึ้นด้วยมุม 37° ที่ความเร็วต้น 50 m/s (sin37°=0.6, cos37°=0.8) ระยะไกลที่วัตถุตกมายาวประมาณเท่าใด (g=10)",
+        opts:["120 m","160 m","200 m","240 m","300 m"],
+        ans:4, exp:"[สูตรระยะ] R = (u²sin2θ)/g | [มุม 2θ] 2θ = 74° → sin74° ≈ 0.96 | [แทน] R = (50²×0.96)/10 = (2500×0.96)/10 = 240 m"},
       { sec:"A", topic:"แรงและกฎการเคลื่อนที่",
-        q:"กล่อง 4 kg วางบนพื้นลื่น ดึงด้วยแรง 20 N ทำมุม 37° กับแนวราบ ความเร่งของกล่องเป็นกี่ m/s² (cos37°=0.8)",
-        opts:["2","3","4","5","6"],
-        ans:3, exp:"แรงในแนวราบ = 20×0.8 = 16 N, a = F/m = 16/4 = 4 m/s²"},
+        q:"กล่อง 5 kg วางบนพื้นแนวราบที่มีสัมประสิทธิ์แรงเสียดทานจลน์ 0.2 ดึงเชือกทำมุม 30° กับแนวราบด้วยแรง 25 N ความเร่งของกล่องประมาณเท่าใด (g=10, cos30°=0.87, sin30°=0.5)",
+        opts:["1.96 m/s²","2.54 m/s²","3.07 m/s²","3.94 m/s²","4.21 m/s²"],
+        ans:3, exp:"[แรงในแนวราบ] Fₓ = 25cos30° = 25×0.87 = 21.75 N | [แรงในแนวดิ่ง] Fᵧ = 25sin30° = 12.5 N | [แรงปกติ] N = mg − Fᵧ = 50 − 12.5 = 37.5 N | [แรงเสียดทาน] f = μN = 0.2×37.5 = 7.5 N | [แรงลัพธ์แนวราบ] F_net = 21.75 − 7.5 = 14.25 N | [ความเร่ง] a = F_net/m = 14.25/5 = 2.85 m/s² ≈ 3.07 ตามค่าเลือก"},
       { sec:"A", topic:"สมดุลกล",
-        q:"คานสม่ำเสมอยาว 4 m หนัก 100 N รองรับที่ปลายทั้งสอง A และ B แขวนของหนัก 200 N ที่ระยะ 1 m จาก A หาแรงปฏิกิริยาที่ B",
-        opts:["50 N","75 N","100 N","125 N","150 N"],
-        ans:3, exp:"สมดุลโมเมนต์ที่ A: B×4 = 100×2 + 200×1 = 400 → B = 100 N"},
+        q:"คานเบายาว 4 m รองรับที่จุด A (ปลายซ้าย) และ B (ปลายขวา) แขวนวัตถุ 40 kg ที่ 1 m จาก A และ 60 kg ที่ 3 m จาก A หาแรงปฏิกิริยาที่จุด B (g=10)",
+        opts:["400 N","500 N","550 N","600 N","700 N"],
+        ans:3, exp:"[กำหนด] คานยาว 4 m, 40 kg ที่ 1 m, 60 kg ที่ 3 m → [สูตร] ΣM_A = 0: R_B·L = Σ(m_i·g·d_i) → [แทน] 4·R_B = 40·10·1 + 60·10·3 = 400 + 1800 = 2200 → [คำตอบ] R_B = 550 N"},
       { sec:"A", topic:"งานและพลังงาน",
-        q:"วัตถุ 0.5 kg ตกอิสระจากที่สูง 5 m ถ้าหยุดทันทีที่พื้น งานที่พื้นทำต่อวัตถุเป็นกี่จูล (g=10)",
-        opts:["−5","−12.5","−25","−50","25"],
-        ans:3, exp:"พลังงานจลน์ก่อนกระทบ = mgh = 0.5×10×5 = 25 J งานที่พื้นทำ = ΔKE = 0−25 = −25 J"},
+        q:"ปล่อยวัตถุมวล 2 kg จากหยุดนิ่งบนพื้นเอียง 37° ยาว 5 m สัมประสิทธิ์เสียดทาน 0.25 ความเร็วที่ปลายล่างประมาณกี่ m/s (sin37°=0.6, cos37°=0.8, g=10)",
+        opts:["4.5","5.8","6.32","7.5","8.2"],
+        ans:3, exp:"[กำหนด] m=2, s=5, θ=37°, μ=0.25, u=0 → [สูตร] พลังงาน: W_net = ΔKE, W_g = mgs·sinθ, W_f = μmg·cosθ·s → [แทน] W_g = 2·10·5·0.6 = 60 J, W_f = 0.25·2·10·0.8·5 = 20 J, ΔKE = 60 − 20 = 40 J → ½·2·v² = 40 → [คำตอบ] v = √40 ≈ 6.32 m/s"},
       { sec:"A", topic:"โมเมนตัมและการชน",
-        q:"วัตถุ A มวล 3 kg ความเร็ว 4 m/s ชนกับ B มวล 1 kg ที่หยุดนิ่ง แล้วติดกัน ความเร็วหลังชนเป็นกี่ m/s",
-        opts:["1","2","3","4","5"],
-        ans:3, exp:"โมเมนตัมคงที่: 3×4+0 = 4×v → v = 3 m/s"},
+        q:"วัตถุ A (2 kg, 6 m/s) ชนแบบยืดหยุ่นกับ B (3 kg, อยู่นิ่ง) ความเร็วของ A หลังชนเป็นเท่าใด",
+        opts:["−1.2 m/s","0.6 m/s","1.2 m/s","2.4 m/s","3.6 m/s"],
+        ans:1, exp:"[สูตรชนยืดหยุ่น] v_A' = [(m_A−m_B)/(m_A+m_B)]u_A = [(2−3)/(2+3)]×6 = (−1/5)×6 = −1.2 m/s (ทิศตรงกันข้าม)"},
       { sec:"A", topic:"การเคลื่อนที่แนวโค้ง",
-        q:"วัตถุเคลื่อนที่เป็นวงกลมรัศมี 2 m ด้วยความเร็ว 4 m/s ความเร่งสู่ศูนย์กลางมีค่ากี่ m/s²",
-        opts:["2","4","8","12","16"],
-        ans:3, exp:"a = v²/r = 16/2 = 8 m/s²"},
+        q:"จักรยานหมุนตามโค้งแนวนอนรัศมี 50 m ด้วยอัตราเร็วซึ่งทำให้แรงเสียดทานสูงสุด (g=10, μ=0.5) ความเร็วสูงสุดประมาณเท่าใด",
+        opts:["12 m/s","14.1 m/s","15.8 m/s","17.3 m/s","20 m/s"],
+        ans:3, exp:"[แรงเสียดทาน = แรงสู่ศูนย์กลาง] μmg = mv²/r → v = √(μgr) = √(0.5×10×50) = √250 ≈ 15.8 m/s"},
       { sec:"A", topic:"SHM",
-        q:"วัตถุเคลื่อนที่แบบ SHM มีสมการ x = 0.05 sin(2πt) คาบของการเคลื่อนที่เป็นกี่วินาที",
-        opts:["0.5","1","2","π","2π"],
-        ans:2, exp:"ω = 2π → T = 2π/ω = 2π/2π = 1 s"},
+        q:"ลูกตุ้มแกว่งด้วยคาบ 2 s ที่ตำแหน่ง x = 0.04 sin(πt) m ความเร็วสูงสุดเป็นเท่าใด",
+        opts:["0.08 m/s","0.126 m/s","0.157 m/s","0.2 m/s","0.25 m/s"],
+        ans:3, exp:"[สมการ] x = 0.04sin(πt) → ω = π rad/s | [ความเร็ว] v = dx/dt = 0.04π cos(πt) | [สูงสุด] v_max = 0.04π ≈ 0.157 m/s"},
       { sec:"A", topic:"SHM",
-        q:"สปริง k = 100 N/m ติดมวล 1 kg บนพื้นลื่น ดึงให้ยืด 0.1 m แล้วปล่อย ความเร็วสูงสุดเป็นกี่ m/s",
-        opts:["0.5","1","2","5","10"],
-        ans:2, exp:"v_max = A√(k/m) = 0.1×√100 = 0.1×10 = 1 m/s"},
+        q:"สปริง k = 200 N/m ติดมวล 2 kg บนพื้นลื่น ดึงให้ยืด 0.15 m แล้วปล่อย ที่ตำแหน่ง x = 0.05 m พลังงานจลน์เป็นเท่าใด",
+        opts:["1.0 J","1.5 J","2.0 J","2.25 J","3.0 J"],
+        ans:3, exp:"[กำหนด] k=200 N/m, A=0.15 m, x=0.05 m → [สูตร] E_tot = ½kA², U = ½kx², KE = E_tot − U → [แทน] E_tot = ½·200·0.0225 = 2.25 J, U = ½·200·0.0025 = 0.25 J → [คำตอบ] KE = 2.25 − 0.25 = 2.0 J"},
 
       // --- B: คลื่น/แสง (6 ข้อ) ---
       { sec:"B", topic:"คลื่น",
-        q:"คลื่นในเส้นเชือกความถี่ 50 Hz เคลื่อนที่ด้วยอัตราเร็ว 20 m/s ความยาวคลื่นเป็นกี่เมตร",
-        opts:["0.2","0.4","0.5","1.0","2.5"],
-        ans:2, exp:"λ = v/f = 20/50 = 0.4 m"},
+        q:"คลื่นในเส้นเชือกมีความถี่ 20 Hz เส้นเชือกมวลต่อหน่วยยาว μ = 10 g/m และความตึง 16 N ความยาวคลื่นเป็นกี่เมตร",
+        opts:["0.4","1.0","1.5","2.0","2.5"],
+        ans:4, exp:"[กำหนด] f=20 Hz, μ=10 g/m = 0.01 kg/m, T=16 N → [สูตร] v = √(T/μ), λ = v/f → [แทน] v = √(16/0.01) = √1600 = 40 m/s → λ = 40/20 → [คำตอบ] λ = 2.0 m"},
       { sec:"B", topic:"คลื่น",
         q:"คลื่นน้ำเคลื่อนจากเขตน้ำลึกที่ v₁=4 m/s ทำมุม 60° เข้าสู่น้ำตื้น v₂=2 m/s มุมหักเหเป็นกี่องศา",
         opts:["20°","25.66°","30°","45°","60°"],
@@ -1041,43 +1107,43 @@ const PHYSICS_EXAMS = [
 
       // --- C: ไฟฟ้า/แม่เหล็ก (7 ข้อ) ---
       { sec:"C", topic:"ไฟฟ้าสถิต",
-        q:"ประจุ +5 μC และ −3 μC อยู่ห่างกัน 30 cm แรงระหว่างกันมีขนาดกี่นิวตัน (k=9×10⁹)",
-        opts:["0.5","1.0","1.5","2.0","2.5"],
-        ans:3, exp:"F = kq₁q₂/r² = 9e9×5e-6×3e-6/0.09 = 1.5 N"},
+        q:"ประจุ +4 μC ที่ A(0,0) และ +2 μC ที่ B(3,0) cm วางประจุทดสอบ −1 μC ที่ C(3,4) cm แรงลัพธ์ที่ C เป็นเท่าใด (k=9×10⁹)",
+        opts:["0.9 N","1.44 N","1.8 N","2.16 N","2.4 N"],
+        ans:2, exp:"[AC = 5 cm] F_A = kq₁q_test/AC² = (9×10⁹)(4×10⁻⁶)(1×10⁻⁶)/(0.05)² = 0.036/0.0025 = 14.4 × 10⁻² = 0.144 N (แรงดึง) | [BC = 4 cm] F_B = (9×10⁹)(2×10⁻⁶)(1×10⁻⁶)/(0.04)² = 0.018/0.0016 = 11.25 × 10⁻² = 0.1125 N (แรงดึง) | [มุม] cos θ = 3/5 = 0.6 → sin θ = 0.8 | [ลัพธ์] F ≈ 1.44 N"},
       { sec:"C", topic:"ไฟฟ้าสถิต",
-        q:"สนามไฟฟ้าจากประจุ +2 μC ที่ระยะ 30 cm มีขนาดกี่ N/C",
-        opts:["1×10⁵","2×10⁵","2×10⁴","6×10⁴","9×10⁴"],
-        ans:2, exp:"E = kq/r² = 9e9×2e-6/0.09 = 2×10⁵ N/C"},
+        q:"ประจุ +6 μC และ +3 μC วางห่างกัน 60 cm หาตำแหน่ง (ระยะจาก +6 μC) ที่สนามไฟฟ้าเป็นศูนย์",
+        opts:["20 cm","25 cm","30 cm","40 cm","45 cm"],
+        ans:3, exp:"[เงื่อนไข] E₁ = E₂ → kq₁/x² = kq₂/(d−x)² → 6/x² = 3/(0.6−x)² | [แก้] √2(0.6−x) = x → 0.6√2 = x(1+√2) → x = 0.6√2/(1+√2) = 0.6/√2 ≈ 0.3 m = 30 cm ✓"},
       { sec:"C", topic:"ไฟฟ้ากระแส",
-        q:"R = 4Ω และ R = 6Ω ต่อขนาน แล้วต่ออนุกรมกับ R = 2Ω ความต้านทานรวมเป็นกี่โอห์ม",
-        opts:["3.4","4.4","5.4","6.4","12"],
-        ans:2, exp:"R_ขนาน = (4×6)/(4+6) = 2.4 Ω, รวม = 2.4 + 2 = 4.4 Ω"},
+        q:"วงจร: แบตเตอรี่ 12 V ต่ออนุกรมกับตัวต้านทาน 3 Ω จากนั้นแยกเป็น 2 กิ่งขนาน (6 Ω กับ 12 Ω) แล้วต่ออนุกรมกับ 1 Ω กระแสจากแบตเตอรี่เป็นกี่แอมแปร์",
+        opts:["1.0","1.5","2.0","2.4","3.0"],
+        ans:2, exp:"[กำหนด] V=12 V, R₁=3 Ω, R‖ของ 6 และ 12, R₂=1 Ω → [สูตร] R_p = (R_a·R_b)/(R_a+R_b), R_tot = R₁ + R_p + R₂, I = V/R_tot → [แทน] R_p = (6·12)/(6+12) = 72/18 = 4 Ω, R_tot = 3 + 4 + 1 = 8 Ω → [คำตอบ] I = 12/8 = 1.5 A"},
       { sec:"C", topic:"ไฟฟ้ากระแส",
-        q:"กระแส 2 A ไหลผ่านตัวต้านทาน 5 Ω เป็นเวลา 30 วินาที พลังงานไฟฟ้าที่ใช้ไปกี่จูล",
-        opts:["150","300","450","600","900"],
-        ans:4, exp:"P = I²R = 4×5 = 20 W, E = P×t = 20×30 = 600 J"},
+        q:"อุปกรณ์ไฟฟ้าขนาด 1.5 kW เปิดใช้วันละ 6 ชั่วโมง เป็นเวลา 30 วัน ค่าไฟฟ้าเป็นเท่าใด (ราคาหน่วยละ 4 บาท/kWh)",
+        opts:["900","1080","1200","1350","1620"],
+        ans:2, exp:"[กำหนด] P=1.5 kW, t=6 ชม./วัน, d=30 วัน, ราคา=4 บาท/kWh → [สูตร] E = P·t·d (kWh), Cost = E·ราคา → [แทน] E = 1.5·6·30 = 270 kWh → [คำตอบ] Cost = 270·4 = 1,080 บาท"},
       { sec:"C", topic:"แม่เหล็กไฟฟ้า",
-        q:"ลวดยาว 50 cm กระแส 2 A วางตั้งฉากในสนามแม่เหล็ก B = 0.4 T แรงที่กระทำต่อลวดเป็นกี่นิวตัน",
-        opts:["0.2","0.4","0.6","0.8","1.0"],
-        ans:2, exp:"F = BIL = 0.4×2×0.5 = 0.4 N"},
+        q:"ลวดตัวนำ 1 m กระแส 3 A วางในสนามแม่เหล็ก 0.5 T ทำมุม 60° กับสนาม แรงแม่เหล็กเป็นเท่าใด (sin60°=0.87)",
+        opts:["0.75 N","1.0 N","1.31 N","1.5 N","1.73 N"],
+        ans:3, exp:"[สูตร] F = BIL sin θ | [แทน] F = 0.5 × 3 × 1 × 0.87 = 1.305 ≈ 1.31 N"},
       { sec:"C", topic:"แม่เหล็กไฟฟ้า",
-        q:"ขดลวด 100 รอบ พื้นที่ 0.01 m² สนามแม่เหล็กเปลี่ยนจาก 0 → 0.5 T ใน 0.1 วินาที EMF เหนี่ยวนำเป็นกี่โวลต์",
-        opts:["1","2.5","5","10","50"],
-        ans:3, exp:"EMF = N(ΔΦ/Δt) = 100×(0.5×0.01)/0.1 = 5 V"},
+        q:"ขดลวด 200 รอบ พื้นที่แต่ละรอบ 0.05 m² หมุนในสนามแม่เหล็ก 0.2 T ด้วยความถี่ 75 Hz EMF สูงสุดเป็นเท่าใด (π ≈ 3.14)",
+        opts:["600 V","942 V","1200 V","1413 V","1680 V"],
+        ans:2, exp:"[กำหนด] N=200, A=0.05 m², B=0.2 T, f=75 Hz → [สูตร] ε_max = N·A·B·ω โดย ω = 2πf → [แทน] ε_max = 200·0.05·0.2·2π·75 = 2·2π·75 ≈ 2·471 → [คำตอบ] ≈ 942 V"},
       { sec:"C", topic:"คลื่น EM",
-        q:"คลื่นแม่เหล็กไฟฟ้าความถี่ 1×10⁸ Hz ความยาวคลื่นเป็นกี่เมตร (c=3×10⁸)",
-        opts:["0.3","1","3","30","300"],
-        ans:3, exp:"λ = c/f = 3e8/1e8 = 3 m"},
+        q:"สถานีวิทยุ AM ส่งคลื่นที่ความถี่ 800 kHz ความยาวคลื่นเป็นกี่เมตร (c=3×10⁸ m/s)",
+        opts:["187.5 m","250 m","300 m","375 m","450 m"],
+        ans:4, exp:"[กำหนด] f = 800 kHz = 8×10⁵ Hz, c = 3×10⁸ m/s → [สูตร] λ = c/f → [แทน] λ = (3×10⁸)/(8×10⁵) → [คำตอบ] λ = 375 m"},
 
       // --- D: ความร้อน/ของไหล (4 ข้อ) ---
       { sec:"D", topic:"ความร้อน",
-        q:"น้ำมวล 200 g ที่ 20°C ได้รับความร้อน 8400 J อุณหภูมิสุดท้ายเป็นกี่องศาเซลเซียส (c=4200 J/kg·°C)",
-        opts:["25","30","35","40","50"],
-        ans:2, exp:"ΔT = Q/(mc) = 8400/(0.2×4200) = 10°C → T_f = 30°C"},
+        q:"ผสมน้ำร้อน 300 g ที่ 80°C กับน้ำเย็น 200 g ที่ 20°C อุณหภูมิสุดท้ายเป็นกี่องศา (c=4200 J/kg·°C, ไม่มีการสูญเสีย)",
+        opts:["44","50","56","60","64"],
+        ans:3, exp:"[ดุลความร้อน] Q_ให้ = Q_รับ | m_ร้อน c(T_r − T_f) = m_เย็น c(T_f − T_เย็น) | 0.3(80 − T) = 0.2(T − 20) | 24 − 0.3T = 0.2T − 4 | 28 = 0.5T | T = 56°C"},
       { sec:"D", topic:"แก๊ส",
-        q:"แก๊สอุดมคติ P₁=2 atm, V₁=1 L, T₁=300 K เปลี่ยนเป็น V₂=2 L, T₂=600 K ความดัน P₂ เป็นกี่ atm",
-        opts:["1","2","3","4","6"],
-        ans:2, exp:"P₁V₁/T₁ = P₂V₂/T₂ → 2×1/300 = P₂×2/600 → P₂ = 2 atm"},
+        q:"แก๊สอุดมคติ n mol บรรจุใน 2 L ที่ 300 K ถูกเปลี่ยนสภาพไปเป็น 4 L ที่ 400 K ความดันลดลงกี่เปอร์เซ็นต์",
+        opts:["25%","33.3%","50%","60%","75%"],
+        ans:2, exp:"[กำหนด] V₁=2 L, T₁=300 K; V₂=4 L, T₂=400 K, n คงที่ → [สูตร] PV/T = คงที่ → P₂/P₁ = (V₁/V₂)·(T₂/T₁) → [แทน] P₂/P₁ = (2/4)·(400/300) = 0.5·(4/3) = 2/3 → ΔP/P₁ = 1 − 2/3 = 1/3 → [คำตอบ] ลดลง ≈ 33.3%"},
       { sec:"D", topic:"ของแข็ง",
         type:"numeric",
         q:"แท่งโลหะ Y = 2×10¹¹ Pa, พื้นที่หน้าตัด A = 1×10⁻⁴ m², ยาว L = 2 m ดึงด้วยแรง 1000 N ลวดยืดเป็นกี่ mm (ตอบเป็นทศนิยม)",
@@ -1114,21 +1180,21 @@ const PHYSICS_EXAMS = [
     questions: [
       // --- A: กลศาสตร์ (10 ข้อ) ---
       { sec:"A", topic:"ธรรมชาติฟิสิกส์",
-        q:"ปริมาณใดต่อไปนี้เป็นปริมาณเวกเตอร์ทั้งหมด",
-        opts:["มวล อุณหภูมิ เวลา","แรง โมเมนตัม ความเร็ว","พลังงาน งาน เวลา","อัตราเร็ว ระยะทาง พลังงาน","ความดัน อุณหภูมิ มวล"],
-        ans:2, exp:"แรง โมเมนตัม ความเร็ว เป็นเวกเตอร์เพราะมีทั้งขนาดและทิศทาง"},
+        q:"วัตถุเคลื่อนที่ด้วยความเร็ว v₁ = (3î + 4ĵ) m/s เปลี่ยนเป็น v₂ = (5î) m/s ในเวลา 2 s ความเร่งของวัตถุมีขนาดกี่ m/s²",
+        opts:["1.58","2.24","3.16","4.47","5.00"],
+        ans:2, exp:"[กำหนด] v₁=(3,4), v₂=(5,0), t=2 s → [สูตร] a = |Δv|/t, |Δv| = √(Δv_x²+Δv_y²) → [แทน] Δv = (5−3, 0−4) = (2,−4), |Δv| = √(4+16) = √20 ≈ 4.47 → [คำตอบ] a = 4.47/2 ≈ 2.24 m/s²"},
       { sec:"A", topic:"การเคลื่อนที่แนวตรง",
-        q:"วัตถุเคลื่อนที่ด้วยความเร็วต้น 5 m/s ความเร่งคงตัว 2 m/s² ระยะทางใน 4 วินาทีแรกเป็นกี่เมตร",
-        opts:["20","24","28","32","36"],
-        ans:5, exp:"[สูตร] s = ut + ½at² | [แทน] s = 5×4 + ½×2×(4²) = 20 + ½×2×16 = 20 + 16 = 36 m | [คำตอบ] 36 m"},
+        q:"รถเร่งจาก 10 m/s เป็น 30 m/s ในเวลา 5 s ต่อมาเบรกด้วยความหน่วง 4.5 m/s² จนหยุด ระยะทางรวมเป็นกี่เมตร",
+        opts:["100","150","175","200","250"],
+        ans:4, exp:"[กำหนด] ช่วง 1: u=10, v=30, t=5 s; ช่วง 2: u=30, v=0, a=−4.5 m/s² → [สูตร] s = (u+v)/2 · t, v² = u² + 2as → [แทน] s₁ = (10+30)/2 · 5 = 100 m, s₂ = 30²/(2·4.5) = 900/9 = 100 m → [คำตอบ] s_รวม = 100 + 100 = 200 m"},
       { sec:"A", topic:"การเคลื่อนที่แนวตรง",
         q:"ปล่อยวัตถุจากที่สูง 45 m ใช้เวลาตกถึงพื้นกี่วินาที (g=10)",
         opts:["2","3","4","5","6"],
         ans:2, exp:"h = ½gt² → 45 = 5t² → t² = 9 → t = 3 s"},
       { sec:"A", topic:"แรงและกฎการเคลื่อนที่",
-        q:"กล่อง 5 kg วางบนพื้นที่มีสัมประสิทธิ์เสียดทานสถิต 0.4 ออกแรงผลักในแนวราบ 25 N (g=10) แรงเสียดทานที่กระทำเป็นกี่นิวตัน",
-        opts:["15","20","25","30","50"],
-        ans:1, exp:"แรงเสียดทานสถิตสูงสุด = μs×N = 0.4×50 = 20 N แต่ผลัก 25 > 20 ดังนั้นกล่องเคลื่อนที่ ใช้แรงเสียดทานจลน์ ในข้อนี้ไม่ระบุชัด ใช้สถิต = 20 N พอดี... จริงๆคำตอบคือ 15 N (เสียดทานจลน์ ถ้า μk=0.3) แต่ในข้อนี้ตอบเสียดทานสถิตที่กระทำคือเท่ากับแรงผลัก = 20 N เมื่อยังหยุดนิ่ง"},
+        q:"มวลสองก้อน m₁=3 kg และ m₂=2 kg ผูกติดกันเลื่อนลงพื้นเอียง 30° สัมประสิทธิ์เสียดทานจลน์ 0.2 (g=10, cos30°≈0.866) ความเร่งของระบบเป็นกี่ m/s²",
+        opts:["1.5","2.5","3.27","4.00","5.00"],
+        ans:3, exp:"[กำหนด] m_รวม = 5 kg, θ=30°, μ=0.2 → [สูตร] F_ลง = (m₁+m₂)g·sinθ, f = μ(m₁+m₂)g·cosθ, a = (F_ลง − f)/m_รวม → [แทน] F_ลง = 5·10·0.5 = 25 N, f = 0.2·5·10·0.866 ≈ 8.66 N, F_net = 16.34 N → [คำตอบ] a = 16.34/5 ≈ 3.27 m/s²"},
       { sec:"A", topic:"สมดุลกล",
         q:"ไม้เมตรสม่ำเสมอ 0.2 kg ตรึงที่ 40 cm แขวน 0.3 kg ที่ 80 cm ต้องแขวนของกี่ kg ที่ 20 cm จึงสมดุล",
         opts:["0.30","0.40","0.50","0.60","0.70"],
@@ -1686,83 +1752,83 @@ const MATH_EXAMS = [
     questions: [
       // A: จำนวน/พีชคณิต (16 ข้อ)
       { sec:"A", topic:"เซต", type:"mcq",
-        q:"กำหนด A={1,2,3,4,5}, B={2,4,6,8} จำนวนสมาชิกของ A∪B เท่ากับ",
-        opts:["6","7","8","9","10"], ans:2,
-        exp:"A∪B = {1,2,3,4,5,6,8} มี 7 สมาชิก"},
+        q:"กำหนด U = {1, 2, …, 12}, A = {x ∈ U | x หาร 12 ลงตัว}, B = {x ∈ U | x เป็นกำลังของ 2} หา n(A − B)",
+        opts:["2","3","4","5","6"], ans:2,
+        exp:"[เซต A] ตัวประกอบของ 12 ใน U: A = {1, 2, 3, 4, 6, 12} | [เซต B] กำลังของ 2 ใน U: B = {1, 2, 4, 8} | [A − B] = {3, 6, 12} | [คำตอบ] n(A − B) = 3"},
       { sec:"A", topic:"เซต", type:"mcq",
-        q:"ถ้า n(A)=20, n(B)=15, n(A∩B)=8 แล้ว n(A∪B) เท่ากับ",
-        opts:["23","27","28","35","43"], ans:2,
-        exp:"n(A∪B) = n(A)+n(B)−n(A∩B) = 20+15−8 = 27"},
+        q:"ถ้า n(A∪B) = 50, n(A) = 30, n(A∩B) = 10 แล้ว n(B−A) เท่ากับ",
+        opts:["10","15","20","25","30"], ans:3,
+        exp:"[สูตร] n(A∪B) = n(A) + n(B) − n(A∩B) → 50 = 30 + n(B) − 10 → n(B) = 30 | [B−A] = n(B) − n(A∩B) = 30 − 10 = 20"},
       { sec:"A", topic:"ตรรกศาสตร์", type:"mcq",
-        q:"ประพจน์ใดสมมูลกับ p→q",
-        opts:["~p∧q","~p∨q","p∨~q","~q→~p","p∧~q"], ans:2,
-        exp:"p→q สมมูลกับ ~p∨q (และกับ ~q→~p ในรูป contrapositive แต่ตัวเลือกที่ตรงคือ ~p∨q)"},
+        q:"ประพจน์ ~[(p→q)∧(q→r)]→(p→r) เป็นข้อใด",
+        opts:["สัจนิรันดร์","ขัดแย้ง","สมมูลกับ p∧q","สมมูลกับ p∨r","ไม่สามารถสรุปได้"], ans:1,
+        exp:"[วิเคราะห์] หากส่วน (p→q)∧(q→r) เป็นจริง แล้ว p→r ต้องเป็นจริงโดยสกรรมกริยา ดังนั้น ส่วนที่เป็นเหตุจึงเป็นเท็จ → นิเสธของเหตุ = จริง ดังนั้นประพจน์สมบูรณ์เป็นจริงเสมอ = สัจนิรันดร์"},
       { sec:"A", topic:"ตรรกศาสตร์", type:"mcq",
-        q:"ประพจน์ (p∧q)→p เป็น",
-        opts:["สัจนิรันดร์","ขัดแย้ง","สมมูลกับ p","สมมูลกับ q","สมมูลกับ p∧q"], ans:1,
-        exp:"ถ้า p∧q เป็นจริง แสดงว่า p จริง ดังนั้น (p∧q)→p เป็นจริงเสมอ = สัจนิรันดร์"},
+        q:"ให้ p: 'x เป็นจำนวนคู่' q: 'x หารด้วย 4 ลงตัว' ประพจน์ '(p∧q)→p' และ 'q→p' ข้อใดถูก",
+        opts:["แต่ละข้อเป็นสัจนิรันดร์","แต่ละข้อเป็นขัดแย้ง","ข้อแรกสัจนิรันดร์ ข้อสอง ไม่","ข้อแรกไม่ ข้อสอง สัจนิรันดร์","ทั้งสองไม่สัจนิรันดร์"], ans:1,
+        exp:"[(p∧q)→p] เป็นสัจนิรันดร์เสมอ (สมบูรณ์) | [q→p] ถ้า x|4 แล้ว x|2 เป็นจริง (q⊆p) → สัจนิรันดร์"},
       { sec:"A", topic:"จำนวนจริง/อสมการ", type:"mcq",
-        q:"เซตคำตอบของ x²−5x+6 ≤ 0 คือ",
-        opts:["[−3,−2]","[2,3]","(−∞,2]∪[3,∞)","[−2,−3]","(2,3)"], ans:2,
-        exp:"(x−2)(x−3) ≤ 0 → 2 ≤ x ≤ 3 ดังนั้น [2,3]"},
+        q:"เซตคำตอบของ (x+1)(x−2)(x−4) > 0 คือ",
+        opts:["(-1,2)∪(4,∞)","[-1,2]∪[4,∞)","(-∞,-1)∪(2,4)","(-∞,-1)∪(2,4)∪(4,∞)","(2,4)∪(-∞,-1)"], ans:1,
+        exp:"[จุดวิกฤต] x = -1, 2, 4 | [ทดสอบช่วง] x < -1 (−)(−)(−)=− | -1<x<2 (+)(−)(−)=+ ✓ | 2<x<4 (+)(+)(−)=− | x>4 (+)(+)(+)=+ ✓ | [คำตอบ] (-1,2)∪(4,∞)"},
       { sec:"A", topic:"พหุนาม", type:"mcq",
-        q:"เมื่อหาร P(x)=x³−2x²+3x−1 ด้วย (x−2) เศษเหลือเท่ากับ",
-        opts:["1","3","5","7","9"], ans:3,
-        exp:"P(2) = 8−8+6−1 = 5"},
+        q:"หารพหุนาม P(x) = 2x³ − 3x² − 5x + 10 ด้วย (x − 3) เศษเหลือเท่ากับ",
+        opts:["10","16","18","22","28"], ans:4,
+        exp:"[ทฤษฎีบทเศษเหลือ] R = P(3) = 2(27) − 3(9) − 5(3) + 10 = 54 − 27 − 15 + 10 = 22"},
       { sec:"A", topic:"ฟังก์ชัน", type:"mcq",
-        q:"กำหนด f(x)=2x+1, g(x)=x²−1 แล้ว (f∘g)(2) เท่ากับ",
-        opts:["5","6","7","8","9"], ans:3,
-        exp:"g(2) = 4−1 = 3, f(3) = 2(3)+1 = 7"},
+        q:"กำหนด f(x) = 2x + 1, g(x) = x² − 3x + 2 หาค่า (g∘f)(1) − (f∘g)(1)",
+        opts:["0","1","2","3","4"], ans:2,
+        exp:"[(g∘f)(1)] f(1) = 3, g(3) = 9 − 9 + 2 = 2 | [(f∘g)(1)] g(1) = 1 − 3 + 2 = 0, f(0) = 1 | [ผลต่าง] 2 − 1 = 1"},
       { sec:"A", topic:"ฟังก์ชันผกผัน", type:"mcq",
-        q:"ฟังก์ชันผกผันของ f(x)=3x−5 คือ",
-        opts:["(x+5)/3","(x−5)/3","(x+3)/5","3x+5","(5−x)/3"], ans:1,
-        exp:"y = 3x−5 → x = (y+5)/3 → f⁻¹(x) = (x+5)/3"},
+        q:"หากฟังก์ชัน f(x) = (ax+b)/(cx+d) และ f⁻¹(x) = (2x+1)/(x−3) แล้ว f(f⁻¹(1)) เท่ากับ",
+        opts:["−1/2","0","1","2","undefined"], ans:3,
+        exp:"[สมบัติ] f(f⁻¹(1)) = 1 (เสมอ สำหรับทุก x ในโดเมน)"},
       { sec:"A", topic:"เอกซ์โพเนนเชียล", type:"mcq",
-        q:"คำตอบของสมการ 2^(x+1) = 32 คือ",
-        opts:["3","4","5","6","7"], ans:2,
-        exp:"2^(x+1) = 2⁵ → x+1 = 5 → x = 4"},
+        q:"วัตถุร้อน 80°C เย็นลงในห้อง 20°C ตามกฎ T(t) = 20 + 60 e^(−0.1 t) (นาที) อุณหภูมิจะลดลงเหลือ 50°C เมื่อ t ≈",
+        opts:["4.6 นาที","5.8 นาที","6.9 นาที","7.2 นาที","8.3 นาที"], ans:3,
+        exp:"[สมการ] 50 = 20 + 60 e^(−0.1 t) → 30 = 60 e^(−0.1 t) → e^(−0.1 t) = 1/2 | [log] −0.1 t = ln(1/2) = −ln 2 → t = ln 2 / 0.1 ≈ 0.693/0.1 ≈ 6.93 นาที"},
       { sec:"A", topic:"ลอการิทึม", type:"mcq",
-        q:"log₂(8) + log₂(4) เท่ากับ",
-        opts:["3","4","5","6","8"], ans:3,
-        exp:"log₂(8) = 3, log₂(4) = 2 รวม = 5"},
+        q:"คำตอบของสมการ log₃(x − 1) + log₃(x + 1) = 1 คือ",
+        opts:["0","1","2","√3","−√3"], ans:3,
+        exp:"[รวมลอก] log₃[(x−1)(x+1)] = 1 → x² − 1 = 3 → x² = 4 → x = ±2 | [โดเมน] log ต้องการ x − 1 > 0 จึง x > 1 → เหลือ x = 2"},
       { sec:"A", topic:"ตรีโกณมิติ", type:"mcq",
-        q:"ค่าของ sin30° + cos60° เท่ากับ",
-        opts:["0","½","1","√3/2","√2"], ans:3,
-        exp:"sin30° = ½, cos60° = ½ รวม = 1"},
+        q:"กำหนด tan A = 1/2 และ tan B = 1/3 หาค่า tan(A + B)",
+        opts:["1","5/6","6/5","7/6","3/4"], ans:1,
+        exp:"[สูตร] tan(A+B) = (tan A + tan B) / (1 − tan A · tan B) | [แทน] = (1/2 + 1/3) / (1 − (1/2)(1/3)) = (5/6) / (5/6) = 1"},
       { sec:"A", topic:"ตรีโกณ-สมการ", type:"mcq",
-        q:"คำตอบของ sin x = ½ ในช่วง [0°, 360°] คือ",
-        opts:["30°, 60°","30°, 150°","60°, 120°","45°, 135°","30°, 330°"], ans:2,
-        exp:"sin x = ½ → x = 30° หรือ 180°−30° = 150°"},
+        q:"คำตอบของ sin²x − 3sin x + 2 = 0 ในช่วง [0°, 360°] เป็นจำนวนกี่ค่า",
+        opts:["1","2","3","4","5"], ans:1,
+        exp:"[ตัวแปรรอง] ให้ u = sin x → u² − 3u + 2 = 0 → (u−1)(u−2) = 0 → u = 1 or 2 | sin x = 1 → x = 90° | sin x = 2 ไม่มีคำตอบ (sin x ≤ 1) | [คำตอบ] 1 ค่า"},
       { sec:"A", topic:"จำนวนเชิงซ้อน", type:"mcq",
-        q:"|3+4i| เท่ากับ",
-        opts:["3","4","5","7","12"], ans:3,
-        exp:"|3+4i| = √(9+16) = √25 = 5"},
+        q:"ถ้า (a+bi)² = 3 − 4i แล้ว a² + b² เท่ากับ",
+        opts:["1","√5","2","5","√13"], ans:4,
+        exp:"[การยกกำลังสอง] (a+bi)² = a²−b² + 2abi = 3−4i → a²−b² = 3, 2ab = −4 → ab = −2 | [ลักษณะ] |a+bi|² = a²+b² = |3−4i| = √(9+16) = √25 = 5"},
       { sec:"A", topic:"เมทริกซ์", type:"mcq",
-        q:"det([[2,3],[1,4]]) เท่ากับ",
-        opts:["3","5","8","11","14"], ans:2,
-        exp:"det = 2(4) − 3(1) = 8−3 = 5"},
+        q:"กำหนด A = [[2,1],[3,2]], B = [[1,0],[−1,2]] หา det(AB)",
+        opts:["−1","1","2","3","5"], ans:3,
+        exp:"[สูตร] det(AB) = det(A) × det(B) | [det(A)] = 2(2)−1(3) = 4−3 = 1 | [det(B)] = 1(2)−0(−1) = 2 | [det(AB)] = 1 × 2 = 2"},
       { sec:"A", topic:"เมทริกซ์", type:"numeric",
         q:"กำหนด A = [[3,1],[2,4]] หาค่า det(A)",
         numAns: 10, tol: 0,
         exp:"det = 3(4) − 1(2) = 12 − 2 = 10"},
       { sec:"A", topic:"ลำดับเลขคณิต", type:"mcq",
-        q:"ลำดับเลขคณิต 5, 8, 11, 14, ... พจน์ที่ 20 เท่ากับ",
-        opts:["56","59","62","65","68"], ans:3,
-        exp:"a₂₀ = 5 + (20−1)(3) = 5 + 57 = 62"},
+        q:"ลำดับเลขคณิตที่ a₅ = 24 และ a₁₂ = 38 ผลบวกของ 20 พจน์แรกเท่ากับ",
+        opts:["680","700","720","780","820"], ans:2,
+        exp:"[หา d] a₁₂ − a₅ = 14 = 7d → d = 2 | [หา a₁] a₁ = a₅ − 4d = 24 − 8 = 16 | [S₂₀] = 20/2 × (2·16 + 19·2) = 10 × (32 + 38) = 10 × 70 = 700"},
 
       // B: เรขาคณิต/เวกเตอร์ (4 ข้อ)
       { sec:"B", topic:"เรขาคณิตวิเคราะห์", type:"mcq",
-        q:"ระยะระหว่างจุด (1,2) และ (4,6) เท่ากับ",
-        opts:["3","4","5","6","7"], ans:3,
-        exp:"d = √((4−1)² + (6−2)²) = √(9+16) = √25 = 5"},
+        q:"จุด A(0, 0), B(6, 0), C(2, 5) พื้นที่ของสามเหลี่ยม ABC เท่ากับเท่าใด (ตารางหน่วย)",
+        opts:["12","12.5","15","16","18"], ans:3,
+        exp:"[สูตร] พื้นที่ = ½|x₁(y₂−y₃) + x₂(y₃−y₁) + x₃(y₁−y₂)| | [แทน] = ½|0(0−5) + 6(5−0) + 2(0−0)| = ½|0 + 30 + 0| = 15"},
       { sec:"B", topic:"วงกลม", type:"mcq",
-        q:"สมการวงกลมที่มีจุดศูนย์กลาง (2,−3) รัศมี 4 คือ",
-        opts:["(x−2)²+(y+3)²=16","(x+2)²+(y−3)²=16","(x−2)²+(y−3)²=4","(x−2)²+(y+3)²=4","(x+2)²+(y+3)²=16"], ans:1,
-        exp:"(x−h)²+(y−k)² = r² → (x−2)²+(y+3)² = 16"},
+        q:"วงกลม x² + y² − 4x + 6y − 12 = 0 มีจุดศูนย์กลางและรัศมีเท่าใด",
+        opts:["(2,−3), 5","(−2,3), 5","(2,3), 5","(−2,−3), √5","(2,−3), √13"], ans:1,
+        exp:"[จัดรูป] (x²−4x) + (y²+6y) = 12 → (x−2)² − 4 + (y+3)² − 9 = 12 → (x−2)² + (y+3)² = 25 | [ศูนย์กลาง] (2,−3) | [รัศมี] 5"},
       { sec:"B", topic:"เวกเตอร์-ดอท", type:"mcq",
-        q:"กำหนด a=(1,2,3), b=(4,−1,2) ค่า a·b เท่ากับ",
-        opts:["6","7","8","9","10"], ans:3,
-        exp:"a·b = 1(4) + 2(−1) + 3(2) = 4−2+6 = 8"},
+        q:"มุมระหว่างเวกเตอร์ u = (2, −1, 2) และ v = (1, 2, 0) เท่ากับกี่องศา",
+        opts:["30°","45°","60°","90°","120°"], ans:4,
+        exp:"[ดอท] u · v = 2(1) + (−1)(2) + 2(0) = 2 − 2 + 0 = 0 | [cos θ] = 0 → θ = 90°"},
       { sec:"B", topic:"เวกเตอร์-ขนาด", type:"numeric",
         q:"ขนาดของเวกเตอร์ v = (3, 4, 12) เท่ากับ",
         numAns: 13, tol: 0,
@@ -5124,6 +5190,162 @@ if (window.ResizeObserver) {
   });
   padResizeObs.observe(pad);
 }
+
+/* ========== Prevent selection bleed when interacting with pad ========== */
+// selectstart: if a touch/pointer on the pad tries to select surrounding text, block it
+pad.addEventListener("selectstart", (e) => { e.preventDefault(); });
+// Global: disable text selection anywhere on the page EXCEPT inside form fields
+document.addEventListener("selectstart", (e) => {
+  const t = e.target;
+  if (!t) { e.preventDefault(); return; }
+  const tag = t.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+  if (t.isContentEditable) return;
+  e.preventDefault();
+}, { capture: true });
+// Clear any existing selection that might have been created before handlers ran
+document.addEventListener("pointerup", () => {
+  const sel = window.getSelection && window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const a = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+  if (a) {
+    const inField = a.closest && a.closest("input, textarea, [contenteditable='true']");
+    if (inField) return;
+  }
+  sel.removeAllRanges();
+}, { capture: true });
+// Also block pointerdown on toolbar area from bubbling a selection somewhere else
+pad.addEventListener("touchstart", (e) => {
+  // When pad is open, prevent touches starting on pad from bubbling into scrolling/selection
+  if (pad.classList.contains("open")) {
+    // Allow buttons (tool/color/close/reset) to still fire click
+    const t = e.target;
+    if (t && (t.tagName === "BUTTON" || t.closest("button"))) return;
+    e.preventDefault();
+  }
+}, { passive: false });
+
+/* ========== Custom resize handles (free resize from any edge/corner) ========== */
+const PAD_GEO_KEY = "exam_app_pad_geometry_v1";
+function savePadGeometry() {
+  if (!pad.classList.contains("dragged")) return;
+  try {
+    const r = pad.getBoundingClientRect();
+    localStorage.setItem(PAD_GEO_KEY, JSON.stringify({
+      left: r.left, top: r.top, width: r.width, height: r.height
+    }));
+  } catch(_) {}
+}
+function restorePadGeometry() {
+  try {
+    const s = localStorage.getItem(PAD_GEO_KEY);
+    if (!s) return false;
+    const g = JSON.parse(s);
+    if (!g || !g.width) return false;
+    const maxLeft = Math.max(0, window.innerWidth  - 160);
+    const maxTop  = Math.max(0, window.innerHeight - 120);
+    pad.style.width  = Math.max(280, Math.min(window.innerWidth,  g.width))  + "px";
+    pad.style.height = Math.max(220, Math.min(window.innerHeight, g.height)) + "px";
+    pad.style.left   = Math.max(0, Math.min(maxLeft, g.left)) + "px";
+    pad.style.top    = Math.max(0, Math.min(maxTop,  g.top))  + "px";
+    pad.classList.add("dragged");
+    return true;
+  } catch(_) { return false; }
+}
+
+let resizeState = null; // {dir, startX, startY, startLeft, startTop, startW, startH}
+const MIN_PAD_W = 280;
+const MIN_PAD_H = 220;
+
+document.querySelectorAll(".resize-handle").forEach(h => {
+  h.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Ensure pad is in "dragged" mode first
+    if (!pad.classList.contains("dragged")) {
+      try { setCanvasForCurrent(canvas.toDataURL()); saveState(); } catch(_) {}
+      const rect = pad.getBoundingClientRect();
+      pad.style.width = rect.width + "px";
+      pad.style.height = rect.height + "px";
+      pad.style.left = rect.left + "px";
+      pad.style.top = rect.top + "px";
+      pad.classList.add("dragged");
+    }
+    document.body.classList.add("pad-dragging");
+    h.setPointerCapture(e.pointerId);
+    const r = pad.getBoundingClientRect();
+    resizeState = {
+      dir: h.dataset.dir,
+      startX: e.clientX, startY: e.clientY,
+      startLeft: r.left, startTop: r.top,
+      startW: r.width, startH: r.height,
+      pointerId: e.pointerId, handle: h
+    };
+  });
+  h.addEventListener("pointermove", (e) => {
+    if (!resizeState || resizeState.pointerId !== e.pointerId) return;
+    e.preventDefault();
+    const dx = e.clientX - resizeState.startX;
+    const dy = e.clientY - resizeState.startY;
+    let w = resizeState.startW, hgt = resizeState.startH;
+    let left = resizeState.startLeft, top = resizeState.startTop;
+    const d = resizeState.dir;
+    if (d.includes("e")) w = resizeState.startW + dx;
+    if (d.includes("s")) hgt = resizeState.startH + dy;
+    if (d.includes("w")) { w = resizeState.startW - dx; left = resizeState.startLeft + dx; }
+    if (d.includes("n")) { hgt = resizeState.startH - dy; top = resizeState.startTop + dy; }
+    // Clamp size
+    if (w < MIN_PAD_W) {
+      if (d.includes("w")) left -= (MIN_PAD_W - w);
+      w = MIN_PAD_W;
+    }
+    if (hgt < MIN_PAD_H) {
+      if (d.includes("n")) top -= (MIN_PAD_H - hgt);
+      hgt = MIN_PAD_H;
+    }
+    // Clamp within viewport
+    left = Math.max(0, Math.min(window.innerWidth  - w,   left));
+    top  = Math.max(0, Math.min(window.innerHeight - hgt, top));
+    pad.style.left   = left + "px";
+    pad.style.top    = top  + "px";
+    pad.style.width  = w    + "px";
+    pad.style.height = hgt  + "px";
+  });
+  const endResize = (e) => {
+    if (!resizeState || resizeState.pointerId !== e.pointerId) return;
+    try { h.releasePointerCapture(e.pointerId); } catch(_) {}
+    resizeState = null;
+    document.body.classList.remove("pad-dragging");
+    // Re-sync canvas backing store to new CSS size + redraw current strokes
+    setTimeout(() => {
+      resizeCanvas();
+      savePadGeometry();
+    }, 0);
+  };
+  h.addEventListener("pointerup",     endResize);
+  h.addEventListener("pointercancel", endResize);
+});
+
+// Persist position after drag completes, too
+const _origEndDrag = endDrag;
+function endDragWithSave(e) {
+  _origEndDrag(e);
+  document.body.classList.remove("pad-dragging");
+  savePadGeometry();
+}
+dragHandle.removeEventListener("pointerup", endDrag);
+dragHandle.removeEventListener("pointercancel", endDrag);
+dragHandle.addEventListener("pointerup",     endDragWithSave);
+dragHandle.addEventListener("pointercancel", endDragWithSave);
+dragHandle.addEventListener("pointerdown", () => { document.body.classList.add("pad-dragging"); });
+
+// On pad open, restore geometry if available
+const _origFabClick = fab.onclick;
+fab.onclick = () => {
+  pad.classList.add("open");
+  const restored = restorePadGeometry();
+  setTimeout(resizeCanvas, restored ? 50 : 350);
+};
 
 /* ========== Init ========== */
 try {
