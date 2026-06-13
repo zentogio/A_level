@@ -379,6 +379,30 @@
   .lowfx .ld-glyphs{display:none;}
   .lowfx .ld-logo .ring{animation:none!important;}
   .lowfx .topbar{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0f1124;}
+
+  /* ===== กระดาษทดเลข (scratch pad) ===== */
+  .scratch-fab{position:fixed;right:18px;bottom:88px;z-index:60;width:54px;height:54px;border-radius:50%;
+    display:none;place-items:center;font-size:24px;cursor:grab;border:none;color:#fff;background:var(--grad);
+    box-shadow:0 12px 28px -8px var(--primary);touch-action:none;user-select:none;}
+  .scratch-fab:active{cursor:grabbing;transform:scale(.94);}
+  .scratch-pad{position:fixed;z-index:70;top:88px;right:16px;width:320px;height:300px;display:none;flex-direction:column;
+    background:var(--panel);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+    box-shadow:0 26px 64px -20px rgba(0,0,0,.92);max-width:96vw;max-height:80vh;}
+  .scratch-pad.open{display:flex;}
+  .sp-head{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:grab;background:var(--panel2);
+    border-bottom:1px solid var(--line);touch-action:none;}
+  .sp-head:active{cursor:grabbing;}
+  .sp-title{font-size:12.5px;font-weight:800;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sp-tools{display:flex;gap:5px;flex:none;}
+  .sp-tool{width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);
+    font-size:14px;cursor:pointer;display:grid;place-items:center;transition:transform .1s var(--ease),border-color .15s,background .15s;}
+  .sp-tool:hover{border-color:var(--primary);}
+  .sp-tool.active{background:rgba(124,92,255,.18);border-color:var(--primary);}
+  .sp-tool:active{transform:scale(.9);}
+  .sp-canvas{flex:1;min-height:0;width:100%;display:block;touch-action:none;cursor:crosshair;
+    background:#ffffff;background-image:linear-gradient(#e6e9f7 1px,transparent 1px),linear-gradient(90deg,#e6e9f7 1px,transparent 1px);background-size:22px 22px;}
+  .sp-resize{position:absolute;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;touch-action:none;z-index:2;
+    background:linear-gradient(135deg,transparent 45%,var(--muted2) 45%,var(--muted2) 55%,transparent 55%,transparent 70%,var(--muted2) 70%,var(--muted2) 80%,transparent 80%);}
 </style>
 </head>
 <body>
@@ -436,6 +460,21 @@
       <button id="mOk"></button>
     </div>
   </div>
+</div>
+
+<button class="scratch-fab" id="scratchFab" title="กระดาษทดเลข" aria-label="กระดาษทดเลข">✏️</button>
+<div class="scratch-pad" id="scratchPad">
+  <div class="sp-head" id="spHead">
+    <span class="sp-title">✏️ กระดาษทด</span>
+    <div class="sp-tools">
+      <button class="sp-tool active" data-tool="pen" title="ดินสอ">✏️</button>
+      <button class="sp-tool" data-tool="eraser" title="ยางลบ">⬜</button>
+      <button class="sp-tool" id="spClear" title="ล้างหน้า">🗑️</button>
+      <button class="sp-tool" id="spClose" title="ปิด">✕</button>
+    </div>
+  </div>
+  <canvas class="sp-canvas" id="spCanvas"></canvas>
+  <div class="sp-resize" id="spResize"></div>
 </div>
 
 <script>
@@ -2217,6 +2256,7 @@ function goHome(){ stopTimer(); session=null; view='home'; render(); toTop(); }
 function render(){
   app.className = 'wrap view-'+view;
   persistNav();
+  if(window.updateScratch) updateScratch();
   if(view==='home') return renderHome();
   if(view==='practice'||view==='mock') return renderQuiz();
   if(view==='result') return renderResult();
@@ -2658,6 +2698,88 @@ restoreSession();
     requestAnimationFrame(probe);
   }
   setTimeout(run, 400);   // รอ paint แรกนิ่งก่อนค่อยวัด เลี่ยง false positive
+})();
+
+/* ---------- กระดาษทดเลข: ปุ่มดินสอลากได้ + กระดาษย้าย/ปรับขนาด/ดินสอ/ยางลบ/ล้างหน้า ---------- */
+(function(){
+  const fab=$('#scratchFab'), pad=$('#scratchPad'), head=$('#spHead'),
+        canvas=$('#spCanvas'), resize=$('#spResize');
+  if(!fab||!pad||!canvas) return;
+  const ctx=canvas.getContext('2d');
+  let tool='pen';
+
+  function setStroke(){
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    if(tool==='eraser'){ ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=22; }
+    else { ctx.globalCompositeOperation='source-over'; ctx.strokeStyle='#2a2f58'; ctx.lineWidth=2.6; }
+  }
+  function fitCanvas(){
+    const r=canvas.getBoundingClientRect();
+    const w=Math.max(1,Math.round(r.width)), h=Math.max(1,Math.round(r.height));
+    if(canvas.width===w && canvas.height===h) return;
+    let tmp=null;
+    if(canvas.width && canvas.height){ tmp=document.createElement('canvas'); tmp.width=canvas.width; tmp.height=canvas.height; tmp.getContext('2d').drawImage(canvas,0,0); }
+    canvas.width=w; canvas.height=h;
+    if(tmp) ctx.drawImage(tmp,0,0);
+    setStroke();
+  }
+
+  // วาด
+  let drawing=false, lx=0, ly=0;
+  function pos(e){ const r=canvas.getBoundingClientRect(); return { x:e.clientX-r.left, y:e.clientY-r.top }; }
+  canvas.addEventListener('pointerdown',e=>{ drawing=true; canvas.setPointerCapture(e.pointerId); const p=pos(e); lx=p.x; ly=p.y; setStroke(); ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+0.1,ly+0.1); ctx.stroke(); e.preventDefault(); });
+  canvas.addEventListener('pointermove',e=>{ if(!drawing)return; const p=pos(e); ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(p.x,p.y); ctx.stroke(); lx=p.x; ly=p.y; });
+  canvas.addEventListener('pointerup',()=>{ drawing=false; });
+  canvas.addEventListener('pointercancel',()=>{ drawing=false; });
+
+  // เครื่องมือ
+  pad.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{
+    tool=b.getAttribute('data-tool'); pad.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x===b)); setStroke();
+  }));
+  $('#spClear').addEventListener('click',()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); });
+  $('#spClose').addEventListener('click',()=>{ pad.classList.remove('open'); });
+  function openPad(){ pad.classList.add('open'); fitCanvas(); }
+
+  // ตัวช่วยลาก: เลื่อน el โดยจับที่ handle ; ถ้าเป็นการแตะ (ไม่ลาก) เรียก onTap
+  function dragify(el, handle, onTap){
+    let down=false, moved=false, sx,sy, ox,oy;
+    handle.addEventListener('pointerdown',e=>{
+      if(e.target.closest('[data-tool],#spClear,#spClose,#spResize')) return;
+      down=true; moved=false; sx=e.clientX; sy=e.clientY;
+      const r=el.getBoundingClientRect(); ox=r.left; oy=r.top;
+      el.style.left=ox+'px'; el.style.top=oy+'px'; el.style.right='auto'; el.style.bottom='auto';
+      try{ handle.setPointerCapture(e.pointerId); }catch(_){}
+    });
+    handle.addEventListener('pointermove',e=>{
+      if(!down)return; const dx=e.clientX-sx, dy=e.clientY-sy;
+      if(Math.abs(dx)+Math.abs(dy)>6) moved=true;
+      let nx=Math.max(2,Math.min(window.innerWidth-el.offsetWidth-2, ox+dx));
+      let ny=Math.max(2,Math.min(window.innerHeight-el.offsetHeight-2, oy+dy));
+      el.style.left=nx+'px'; el.style.top=ny+'px';
+    });
+    handle.addEventListener('pointerup',()=>{ if(!down)return; down=false; if(!moved && onTap) onTap(); });
+    handle.addEventListener('pointercancel',()=>{ down=false; });
+  }
+  dragify(fab, fab, ()=>{ pad.classList.contains('open') ? pad.classList.remove('open') : openPad(); });
+  dragify(pad, head, null);
+
+  // ปรับขนาดกระดาษ
+  let rz=false, rsx,rsy,rsw,rsh;
+  resize.addEventListener('pointerdown',e=>{ rz=true; try{resize.setPointerCapture(e.pointerId);}catch(_){}
+    rsx=e.clientX; rsy=e.clientY; rsw=pad.offsetWidth; rsh=pad.offsetHeight; e.preventDefault(); e.stopPropagation(); });
+  resize.addEventListener('pointermove',e=>{ if(!rz)return;
+    pad.style.width =Math.max(220,Math.min(window.innerWidth-12,  rsw+(e.clientX-rsx)))+'px';
+    pad.style.height=Math.max(190,Math.min(window.innerHeight-12, rsh+(e.clientY-rsy)))+'px'; });
+  resize.addEventListener('pointerup',()=>{ if(!rz)return; rz=false; fitCanvas(); });
+  resize.addEventListener('pointercancel',()=>{ rz=false; fitCanvas(); });
+
+  // แสดงปุ่มเฉพาะตอนทำข้อสอบ
+  window.updateScratch=function(){
+    const quiz=(view==='practice'||view==='mock');
+    fab.style.display=quiz?'grid':'none';
+    if(!quiz) pad.classList.remove('open');
+  };
+  updateScratch();
 })();
 </script>
 </body>
