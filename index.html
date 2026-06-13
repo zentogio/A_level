@@ -2143,7 +2143,7 @@ function isAnswered(q,a){ return !(a===undefined||a===null||a===''); }
 function isCorrect(q,a){
   if(!isAnswered(q,a)) return false;
   if(q.type==='numeric'){
-    const n = parseFloat(String(a).replace(',','.'));
+    const n = parseFloat(String(a).trim().replace(/[−–—]/g,'-').replace(',','.'));
     if(isNaN(n)) return false;
     return Math.abs(n - q.numAns) <= (q.tol||0) + 1e-9;
   }
@@ -2442,10 +2442,9 @@ function renderQuiz(){
     ${q.svg?`<div class="qfig">${q.svg}</div>`:(q.fig?`<div class="qfig"><img src="${q.fig}" alt="รูปประกอบโจทย์"></div>`:'')}`;
 
   if(q.type==='numeric'){
-    const val=session.answers[session.cur]!=null?session.answers[session.cur]:'';
     h+=`<div class="numwrap">
       <input class="numinput" id="numIn" inputmode="decimal" autocomplete="off"
-        placeholder="พิมพ์คำตอบที่นี่" value="${val}">
+        placeholder="พิมพ์คำตอบที่นี่">
     </div>`;
   }else{
     h+=`<div class="opts">`;
@@ -2498,6 +2497,7 @@ function renderQuiz(){
   });
   const numIn=$('#numIn');
   if(numIn){
+    const sv=session.answers[session.cur]; if(sv!=null) numIn.value=sv;   // เซ็ตค่าผ่าน JS (กัน HTML แตกถ้าพิมพ์ " หรือ <)
     numIn.oninput=()=>{ setAnswer(session.cur, numIn.value.trim()); updateAnsweredStrip(); };
   }
   document.querySelectorAll('[data-nav]').forEach(el=>{
@@ -2669,7 +2669,7 @@ restoreSession();
   const landing=$('#landing'); if(!landing) return;
   const deep = view!=='home';
   let skipped=false; try{ skipped = sessionStorage.getItem('alevel_entered')==='1'; }catch(e){}
-  if(deep || skipped){ landing.remove(); return; }
+  if(deep || skipped){ try{ sessionStorage.setItem('alevel_entered','1'); }catch(e){} landing.remove(); return; }
   document.body.style.overflow='hidden';
   let entered=false;
   function enterApp(){
@@ -2772,6 +2772,8 @@ restoreSession();
     pad.style.height=Math.max(190,Math.min(window.innerHeight-12, rsh+(e.clientY-rsy)))+'px'; });
   resize.addEventListener('pointerup',()=>{ if(!rz)return; rz=false; fitCanvas(); });
   resize.addEventListener('pointercancel',()=>{ rz=false; fitCanvas(); });
+
+  window.addEventListener('resize',()=>{ if(pad.classList.contains('open')) fitCanvas(); });
 
   // แสดงปุ่มเฉพาะตอนทำข้อสอบ
   window.updateScratch=function(){
