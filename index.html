@@ -2143,10 +2143,21 @@ function persistMock(){
   saveStore();
 }
 
+// จำหน้าปัจจุบัน (view + ควิซที่กำลังทำ) เพื่อกลับมาที่เดิมเมื่อรีเฟรช
+function persistNav(){
+  try{
+    if(!session){ store.nav={ view }; }
+    else { store.nav={ view, mode:session.mode, topicId:session.topicId, diff:session.diff,
+      mockId:session.mockId, cur:session.cur, answers:session.answers, submitted:!!session.submitted }; }
+    saveStore();
+  }catch(e){}
+}
+
 function setAnswer(idx,val){
   if(val===''||val===undefined||val===null) delete session.answers[idx];
   else session.answers[idx]=val;
   if(session.mode==='mock') persistMock();
+  persistNav();
 }
 function countAnswered(){
   return session.questions.reduce((n,q,i)=>n+(isAnswered(q,session.answers[i])?1:0),0);
@@ -2183,6 +2194,7 @@ function goHome(){ stopTimer(); session=null; view='home'; render(); toTop(); }
    ========================================================================= */
 function render(){
   app.className = 'wrap view-'+view;
+  persistNav();
   if(view==='home') return renderHome();
   if(view==='practice'||view==='mock') return renderQuiz();
   if(view==='result') return renderResult();
@@ -2427,6 +2439,7 @@ function renderQuiz(){
   $('#resetBtn').onclick=()=>{
     confirmModal('รีเซ็ตข้อสอบ','ล้างคำตอบทั้งหมดและเริ่มทำใหม่ตั้งแต่ต้น?','ล้างและเริ่มใหม่',resetQuiz,true);
   };
+  persistNav();
 }
 function updateAnsweredStrip(){
   const total=session.questions.length, answered=countAnswered();
@@ -2547,15 +2560,46 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden) stopTimer();
   else if(view==='mock' && session && !session.submitted) startTimer();
 });
-render();
 
-/* ---------- หน้า Landing: ล็อกสกอลล์จนกว่าจะกด "เข้าสู่บทเรียน" ---------- */
+// กู้คืนหน้าที่ค้างไว้ตอนรีเฟรช (ไม่เด้งกลับหน้าแรก/landing)
+function restoreSession(){
+  const n=store.nav;
+  try{
+    if(n && n.view){
+      if(n.view==='mock' && n.mockId && MOCK_EXAMS.find(m=>m.id===n.mockId)){
+        startMock(n.mockId); return;          // โหลดคำตอบ/เวลา/สถานะส่งจาก store.mock
+      }
+      if((n.view==='practice'||n.view==='result') && n.topicId){
+        const b=QUESTION_BANK[n.topicId], qs=b?b[n.diff]:null;
+        if(qs && qs.length){
+          session={ mode:'practice', topicId:n.topicId, diff:n.diff, questions:qs,
+            answers:(n.answers&&typeof n.answers==='object')?{...n.answers}:{},
+            cur:Math.min(Math.max(0,n.cur||0), qs.length-1), submitted:!!n.submitted };
+          if(n.view==='result' && session.submitted){
+            let s=0; qs.forEach((q,i)=>{ if(isCorrect(q,session.answers[i])) s++; }); session.score=s;
+            view='result'; render(); return;
+          }
+          view='practice'; render(); return;
+        }
+      }
+    }
+  }catch(e){}
+  view='home'; render();
+}
+restoreSession();
+
+/* ---------- หน้า Landing: แสดงเฉพาะตอนเปิดครั้งแรกของแต่ละครั้งที่เข้าเว็บ ---------- */
+/* รีเฟรช (แท็บเดิม) หรือกำลังกู้หน้าควิซ/ผลคะแนน → ข้าม landing ทันที ไม่ย้อนกลับ */
 (function(){
   const landing=$('#landing'); if(!landing) return;
+  const deep = view!=='home';
+  let skipped=false; try{ skipped = sessionStorage.getItem('alevel_entered')==='1'; }catch(e){}
+  if(deep || skipped){ landing.remove(); return; }
   document.body.style.overflow='hidden';
   let entered=false;
   function enterApp(){
     if(entered) return; entered=true;
+    try{ sessionStorage.setItem('alevel_entered','1'); }catch(e){}
     document.body.style.overflow='';
     landing.classList.add('leaving');
     if(view==='home') renderHome();           // ให้หน้าแรกเฟดทักทายสด ๆ ตอนเข้า
