@@ -153,6 +153,12 @@
   .pbar>i{display:block;height:100%;background:var(--grad);border-radius:999px;transition:width .45s var(--ease);}
 
   /* ===== Stats donuts (หน้าแรก) ===== */
+  .statfilter{display:flex;gap:7px;flex-wrap:wrap;margin:0 2px 13px;}
+  .statfilter button{font-size:12.5px;font-weight:700;color:var(--muted);background:var(--panel);border:1px solid var(--line2);
+    padding:7px 13px;border-radius:999px;cursor:pointer;transition:transform .12s var(--ease),border-color .18s,background .18s,color .18s;}
+  .statfilter button:hover{border-color:var(--primary);color:var(--txt);}
+  .statfilter button.active{background:rgba(124,92,255,.16);border-color:var(--primary);color:var(--primary2);}
+  .statfilter button:active{transform:scale(.96);}
   .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;}
   @media(max-width:560px){.statgrid{grid-template-columns:repeat(3,1fr);}}
   .statcell{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px 8px 11px;text-align:center;
@@ -2054,6 +2060,7 @@ const STORE_KEY = 'alevel_math_v2';
 let store = loadStore();             // { topics:{id:{best,total}}, mock:{id:{answers,elapsed,submitted}} }
 let openSection = null;              // accordion หน้าแรก
 let openTopic = null;                // หัวข้อที่กางเลือกระดับอยู่
+let statFilter = 'all';              // ฟิลเตอร์สถิติ: all | easy | med | hard
 let view = 'home';                   // home | practice | mock | result
 let session = null;                  // ควิซที่กำลังทำอยู่
 let timerInt = null;
@@ -2075,6 +2082,16 @@ function diffCount(id,d){ const b=QUESTION_BANK[id]; return b&&b[d]?b[d].length:
 function diffName(d){ const x=DIFFS.find(z=>z.id===d); return x?x.name:d; }
 function bestOf(id,d){ const r=store.topics[id+':'+d]; return r&&r.best>=0?r.best:-1; }
 function bestOfTopic(id){ return Math.max(bestOf(id,'easy'),bestOf(id,'med'),bestOf(id,'hard')); }
+function statVal(id){ return statFilter==='all'? bestOfTopic(id) : bestOf(id,statFilter); }
+function paintStats(){
+  document.querySelectorAll('.statcell').forEach(cell=>{
+    const id=cell.getAttribute('data-statgo'), best=statVal(id);
+    const pct=best<0?0:best, deg=pct*3.6;
+    const col=best<0?'var(--track)':pct>=70?'var(--good)':pct>=50?'var(--warn)':'var(--bad)';
+    cell.querySelector('.donut').style.background=`conic-gradient(${col} ${deg}deg, var(--track) ${deg}deg)`;
+    cell.querySelector('.dn-in').innerHTML = best<0?'<span class="dn-none">—</span>':'<b>'+pct+'%</b>';
+  });
+}
 function starsFor(pct){ if(pct>=90)return 3; if(pct>=70)return 2; if(pct>=50)return 1; return 0; }
 function starStr(n){ return '★★★'.slice(0,n) + '☆☆☆'.slice(0,3-n); }
 
@@ -2232,10 +2249,16 @@ function renderHome(){
     </div>
   </div>
 
-  <div class="sec-head"><h2>สถิติของฉัน</h2><span class="hint">% ดีสุดของแต่ละเรื่อง · แตะเพื่อไปทำ</span></div>
+  <div class="sec-head"><h2>สถิติของฉัน</h2><span class="hint">% ดีสุด · แตะการ์ดเพื่อไปทำ</span></div>
+  <div class="statfilter">
+    <button data-sf="all"${statFilter==='all'?' class="active"':''}>รวมทุกระดับ</button>
+    <button data-sf="easy"${statFilter==='easy'?' class="active"':''}>🟢 ง่าย</button>
+    <button data-sf="med"${statFilter==='med'?' class="active"':''}>🟡 ปานกลาง</button>
+    <button data-sf="hard"${statFilter==='hard'?' class="active"':''}>🔴 ยาก</button>
+  </div>
   <div class="statgrid">`;
   TOPICS.forEach(t=>{
-    const best=bestOfTopic(t.id);
+    const best=statVal(t.id);
     const pct=best<0?0:best, deg=pct*3.6;
     const col=best<0?'var(--track)':pct>=70?'var(--good)':pct>=50?'var(--warn)':'var(--bad)';
     h+=`<div class="statcell" data-statgo="${t.id}">
@@ -2299,6 +2322,13 @@ function renderHome(){
 
   $('#modeMock').onclick=()=>startMock(MOCK_EXAMS[0].id);
   $('#modePractice').onclick=()=>{ $('#practiceAnchor').scrollIntoView({behavior:'smooth',block:'start'}); };
+  document.querySelectorAll('[data-sf]').forEach(el=>{
+    el.onclick=()=>{
+      statFilter=el.getAttribute('data-sf');
+      document.querySelectorAll('[data-sf]').forEach(b=>b.classList.toggle('active', b===el));
+      paintStats();
+    };
+  });
   document.querySelectorAll('[data-statgo]').forEach(el=>{
     el.onclick=()=>{
       const id=el.getAttribute('data-statgo'), t=topicById(id);
