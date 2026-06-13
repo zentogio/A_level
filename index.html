@@ -329,7 +329,7 @@
     transition:opacity .6s var(--ease),transform .7s var(--ease),filter .6s var(--ease);}
   .landing.leaving{opacity:0;transform:scale(1.06);filter:blur(7px);pointer-events:none;}
   .ld-bg{position:absolute;inset:0;pointer-events:none;}
-  .aurora{position:absolute;border-radius:50%;filter:blur(64px);opacity:.5;mix-blend-mode:screen;will-change:transform;}
+  .aurora{position:absolute;border-radius:50%;filter:blur(46px);opacity:.42;will-change:transform;}
   .aurora.a1{width:60vmax;height:60vmax;top:-22%;left:-14%;background:radial-gradient(circle,#7c5cff,transparent 68%);animation:drift1 19s var(--ease) infinite alternate;}
   .aurora.a2{width:52vmax;height:52vmax;bottom:-24%;right:-16%;background:radial-gradient(circle,#34e0c8,transparent 68%);animation:drift2 23s var(--ease) infinite alternate;}
   .aurora.a3{width:46vmax;height:46vmax;top:30%;left:42%;background:radial-gradient(circle,#5b8bff,transparent 70%);opacity:.35;animation:drift3 27s var(--ease) infinite alternate;}
@@ -374,6 +374,11 @@
     .landing{transition:opacity .2s!important;}
     .landing.leaving{transform:none;filter:none;}
   }
+  /* โหมดประหยัด GPU: เปิดอัตโนมัติเมื่อเครื่องเฟรมตก (โน้ตบุ๊ก/การ์ดจอออนบอร์ด) */
+  .lowfx .aurora{animation:none!important;filter:blur(32px);opacity:.36;}
+  .lowfx .ld-glyphs{display:none;}
+  .lowfx .ld-logo .ring{animation:none!important;}
+  .lowfx .topbar{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0f1124;}
 </style>
 </head>
 <body>
@@ -2636,6 +2641,23 @@ restoreSession();
     setTimeout(()=>{ landing.remove(); }, 700);
   }
   $('#ldEnter').onclick=enterApp;
+})();
+
+/* ---------- ตรวจเฟรมเรต: ถ้าเครื่องเฟรมตกให้เข้าโหมดประหยัด GPU อัตโนมัติ ---------- */
+(function(){
+  if(!('requestAnimationFrame' in window)) return;
+  function run(){
+    let frames=0, t0;
+    function probe(t){
+      if(t0===undefined) t0=t;
+      frames++;
+      if(t - t0 < 600){ requestAnimationFrame(probe); return; }
+      const fps = frames/((t - t0)/1000);
+      if(fps < 38) document.documentElement.classList.add('lowfx');
+    }
+    requestAnimationFrame(probe);
+  }
+  setTimeout(run, 400);   // รอ paint แรกนิ่งก่อนค่อยวัด เลี่ยง false positive
 })();
 </script>
 </body>
